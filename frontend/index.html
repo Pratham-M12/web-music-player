@@ -47,9 +47,21 @@
       <li><a href="#genres">Genres</a></li>
       <li><a href="#events">Live</a></li>
     </ul>
+    <!-- Search button -->
+    <button class="nav-search-btn" id="navSearchBtn" aria-label="Search" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
     <div class="nav-actions">
-      <button class="btn-ghost" id="loginBtn">Sign In</button>
+      <button class="btn-ghost" id="loginBtn" onclick="SpotifyAPI.login()">Sign In with Spotify</button>
       <button class="btn-primary" id="signupBtn">Get SONIX Free</button>
+      <!-- Shown after login -->
+      <div id="userMenu" style="display:none;align-items:center;gap:10px">
+        <img id="userAvatar" src="" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #ff6b9d">
+        <span id="userDisplayName" style="font-size:0.85rem;color:rgba(255,255,255,0.8)"></span>
+        <button class="btn-ghost" style="padding:6px 14px;font-size:0.8rem" onclick="SpotifyAPI.logout()">Sign Out</button>
+      </div>
     </div>
     <button class="nav-hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -68,7 +80,111 @@
     </ul>
   </div>
 
-  <!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+  <!-- ═══════════════════════════════ SEARCH OVERLAY ═══════════════════════════════ -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-overlay-bg" id="searchOverlayBg"></div>
+    <div class="search-panel">
+
+      <!-- Search input row -->
+      <div class="search-input-wrap">
+        <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search songs, artists, albums…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="search-close-btn" id="searchCloseBtn" aria-label="Close search">✕</button>
+      </div>
+
+      <!-- Quick filter tabs -->
+      <div class="search-tabs">
+        <button class="search-tab active" data-type="all">All</button>
+        <button class="search-tab" data-type="track">Songs</button>
+        <button class="search-tab" data-type="artist">Artists</button>
+        <button class="search-tab" data-type="album">Albums</button>
+      </div>
+
+      <!-- Results -->
+      <div class="search-results" id="searchResults">
+        <!-- Populated by JS -->
+        <div class="search-empty" id="searchEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p>Search Spotify's entire library</p>
+          <span>Songs · Artists · Albums</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SONIX APP (logged-in view) ═══════════════════════════════ -->
+  <div id="sonixApp" style="display:none">
+    <!-- Left Sidebar -->
+    <div class="snx-sidebar" id="snxSidebar">
+
+      <!-- Logo -->
+      <div class="snx-sidebar-logo">
+        <div class="logo-icon" style="width:28px;height:28px">
+          <svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="28" stroke="url(#lg2)" stroke-width="2.5"/><path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/><line x1="10" y1="25" x2="50" y2="25" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6"/><line x1="10" y1="37" x2="50" y2="37" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6"/><defs><linearGradient id="lg2" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff9a3c"/></linearGradient></defs></svg>
+        </div>
+        <span>SONIX</span>
+      </div>
+
+      <!-- Main nav -->
+      <nav class="snx-sidebar-nav">
+        <button class="snx-nav-item active" data-view="home">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="snx-nav-item" data-view="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search</span>
+        </button>
+        <button class="snx-nav-item" data-view="library">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span>Your Library</span>
+        </button>
+      </nav>
+
+      <!-- Library quick items -->
+      <div class="snx-sidebar-lib">
+        <div class="snx-sidebar-lib-header">
+          <span>Your Library</span>
+          <button class="snx-sidebar-create" title="Create playlist">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+          </button>
+        </div>
+        <div class="snx-sidebar-items" id="snxSidebarItems">
+          <!-- Populated by JS after login -->
+          <div class="snx-sidebar-liked">
+            <div class="snx-liked-icon">
+              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <div class="snx-sidebar-item-info">
+              <span class="snx-si-name">Liked Songs</span>
+              <span class="snx-si-sub">Playlist</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="snx-main" id="snxMain">
+      <!-- Rendered by router.js -->
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- ═══════════════════════════════ HERO ═════════════════════════════════ -->
   <section class="hero" id="hero">
     <div class="hero-bg">
       <div class="hero-orb hero-orb-1"></div>
@@ -594,36 +710,77 @@
     <div class="cta-bg-orb cta-orb-1"></div>
     <div class="cta-bg-orb cta-orb-2"></div>
     <div class="cta-content">
-      <span class="section-tag">START TODAY</span>
-      <h2 class="cta-title">Your Music.<br/><span class="gradient-text">Unlimited.</span></h2>
-      <p class="cta-sub">Join 50 million+ listeners. Free forever, or go Premium for the full cinematic experience.</p>
-      <div class="cta-plans">
+      <span class="section-tag">PLANS & PRICING</span>
+      <h2 class="cta-title">Premium Plans.<br/><span class="gradient-text">In Rupees.</span></h2>
+      <p class="cta-sub">All plans include a 1-month free trial. Cancel anytime.</p>
+      <div class="cta-plans" style="grid-template-columns:repeat(5,1fr);max-width:1100px;">
+
+        <!-- Mini -->
         <div class="plan-card plan-free">
-          <h3>Free</h3>
-          <p class="plan-price">$0<span>/mo</span></p>
+          <h3>Mini</h3>
+          <p class="plan-price">₹7<span>/day</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Unlimited streaming</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 15M+ tracks</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Ad-supported</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Ad-free music</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 mobile device</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 30 song offline</li>
           </ul>
-          <button class="btn-ghost plan-btn">Get Free</button>
+          <button class="btn-ghost plan-btn">Try Free</button>
         </div>
+
+        <!-- Individual -->
         <div class="plan-card plan-premium">
-          <div class="plan-badge">MOST POPULAR</div>
-          <h3>Premium</h3>
-          <p class="plan-price">$9.99<span>/mo</span></p>
+          <div class="plan-badge">POPULAR</div>
+          <h3>Individual</h3>
+          <p class="plan-price">₹59<span>/mo</span></p>
           <ul class="plan-features">
             <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Ad-free forever</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Offline mode</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> HiFi lossless audio</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Spatial audio</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Priority live tickets</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Offline downloads</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> HiFi audio</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 account</li>
           </ul>
           <button class="btn-primary plan-btn">Start Free Trial</button>
         </div>
+
+        <!-- Student -->
+        <div class="plan-card plan-free">
+          <h3>Student</h3>
+          <p class="plan-price">₹29<span>/mo</span></p>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All Individual perks</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Verified students</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 account</li>
+          </ul>
+          <button class="btn-ghost plan-btn">Get Student</button>
+        </div>
+
+        <!-- Duo -->
+        <div class="plan-card plan-free">
+          <h3>Duo</h3>
+          <p class="plan-price">₹149<span>/mo</span></p>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 2 accounts</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Same address</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All premium perks</li>
+          </ul>
+          <button class="btn-ghost plan-btn">Try Duo</button>
+        </div>
+
+        <!-- Family -->
+        <div class="plan-card plan-free">
+          <h3>Family</h3>
+          <p class="plan-price">₹179<span>/mo</span></p>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 6 accounts</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Kids safe mode</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All premium perks</li>
+          </ul>
+          <button class="btn-ghost plan-btn">Try Family</button>
+        </div>
+
       </div>
     </div>
   </section>
+
 
   <!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
   <footer class="footer">
@@ -758,6 +915,9 @@
     </div>
   </div>
 
+  <script src="config.js"></script>
+  <script src="spotify.js"></script>
+  <script src="router.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

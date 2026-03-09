@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────
 //  Wait for GSAP + Lenis to load
 // ─────────────────────────────────────────────
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   initCursor();
   initLenis();
   initGSAP();
@@ -14,7 +14,117 @@ window.addEventListener('load', () => {
   initPlayer();
   initCounters();
   initMobileNav();
+  initSearch();
+
+  // ── Spotify: check for OAuth callback code in URL
+  const urlParams   = new URLSearchParams(window.location.search);
+  const spotifyCode = urlParams.get('spotify_code');
+
+  if (spotifyCode) {
+    const ok = await SpotifyAPI.handleCallback(spotifyCode);
+    if (ok) await onSpotifyLogin();
+  } else if (SpotifyAPI.loadToken()) {
+    await onSpotifyLogin();
+  }
 });
+
+async function onSpotifyLogin() {
+  SpotifyAPI.updateLoginUI(true);
+  SpotifyAPI.initSDK();
+
+  // ── Switch to app layout ──────────────────────────────────────
+  const landing = document.getElementById('landing') ||
+    document.querySelector('.hero')?.closest('body > *:not(#sonixApp):not(.navbar):not(.search-overlay):not(#cursorOuter):not(#cursorDot):not(.player-bar):not(script)');
+  const appEl   = document.getElementById('sonixApp');
+  const navbar  = document.getElementById('navbar');
+
+  // Hide the landing page sections — wrap check
+  document.querySelectorAll(
+    '.hero, .ticker-bar, .artists-section, .trending-section, .albums-section, .genres-section, .events-section, .cta-section, footer'
+  ).forEach(el => el.style.display = 'none');
+
+  // Show app
+  if (appEl) {
+    appEl.style.cssText = 'display:flex;position:fixed;inset:0;bottom:80px;z-index:100;';
+  }
+  if (navbar) navbar.style.display = 'none';
+
+  // ── Sidebar nav binding ───────────────────────────────────────
+  document.querySelectorAll('.snx-nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      SonixRouter.navigate(btn.dataset.view);
+    });
+  });
+
+  // ── Initialize router with main content el ───────────────────
+  const mainEl = document.getElementById('snxMain');
+  if (mainEl) SonixRouter.init(mainEl);
+
+  // ── Populate sidebar library ──────────────────────────────────
+  _populateSidebar();
+}
+
+async function _populateSidebar() {
+  const container = document.getElementById('snxSidebarItems');
+  if (!container) return;
+
+  const [playlists, artists] = await Promise.all([
+    SpotifyAPI.getUserPlaylists(),
+    SpotifyAPI.getFollowedArtists(),
+  ]);
+
+  const pls  = playlists?.items || [];
+  const arts = artists?.artists?.items || [];
+
+  let html = `
+    <div class="snx-sidebar-liked" data-action="navigate" data-view="library">
+      <div class="snx-liked-icon">
+        <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </div>
+      <div class="snx-sidebar-item-info">
+        <span class="snx-si-name">Liked Songs</span>
+        <span class="snx-si-sub">Playlist</span>
+      </div>
+    </div>`;
+
+  pls.slice(0, 10).forEach(pl => {
+    const img = pl.images?.[0]?.url;
+    html += `
+      <div class="snx-sidebar-item" data-action="play" data-uri="${pl.uri}">
+        <div class="snx-si-img" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#ff6b9d)'}"></div>
+        <div class="snx-sidebar-item-info">
+          <span class="snx-si-name">${pl.name}</span>
+          <span class="snx-si-sub">Playlist · ${pl.owner?.display_name || ''}</span>
+        </div>
+      </div>`;
+  });
+
+  arts.slice(0, 8).forEach(a => {
+    const img = a.images?.[1]?.url || a.images?.[0]?.url;
+    html += `
+      <div class="snx-sidebar-item" data-action="artist" data-id="${a.id}">
+        <div class="snx-si-img snx-si-img-circle" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#c77dff)'}"></div>
+        <div class="snx-sidebar-item-info">
+          <span class="snx-si-name">${a.name}</span>
+          <span class="snx-si-sub">Artist</span>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Bind clicks
+  container.querySelectorAll('[data-action="play"]').forEach(el => {
+    el.addEventListener('click', () => SpotifyAPI.playContext(el.dataset.uri));
+  });
+  container.querySelectorAll('[data-action="artist"]').forEach(el => {
+    el.addEventListener('click', () => SonixRouter.navigate('artist', el.dataset.id));
+  });
+  container.querySelectorAll('[data-action="navigate"]').forEach(el => {
+    el.addEventListener('click', () => SonixRouter.navigate(el.dataset.view));
+  });
+}
+
 
 // ─────────────────────────────────────────────
 //  CUSTOM CURSOR
@@ -382,22 +492,45 @@ function initPlayer() {
 
   loadTrack(0);
 
-  playBtn.addEventListener('click', togglePlay);
-  prevBtn.addEventListener('click', prevTrack);
-  nextBtn.addEventListener('click', nextTrack);
+  playBtn.addEventListener('click', () => {
+    if (SpotifyAPI.isLoggedIn()) {
+      if (SpotifyAPI.isSdkPaused()) { SpotifyAPI.resumePlayback(); play(); }
+      else                          { SpotifyAPI.pausePlayback();  pause(); }
+    } else {
+      togglePlay();
+    }
+  });
+
+  prevBtn.addEventListener('click', () => {
+    if (SpotifyAPI.isLoggedIn()) SpotifyAPI.prevTrackSDK();
+    else prevTrack();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (SpotifyAPI.isLoggedIn()) SpotifyAPI.nextTrackSDK();
+    else nextTrack();
+  });
+
   shuffleBtn.addEventListener('click', () => {
     isShuffle = !isShuffle;
     shuffleBtn.classList.toggle('active', isShuffle);
+    if (SpotifyAPI.isLoggedIn()) SpotifyAPI.setShuffle(isShuffle);
   });
+
   repeatBtn.addEventListener('click', () => {
     isRepeat = !isRepeat;
     repeatBtn.classList.toggle('active', isRepeat);
+    if (SpotifyAPI.isLoggedIn()) SpotifyAPI.setRepeat(isRepeat ? 'track' : 'off');
   });
 
   // Progress seek
   progressEl?.addEventListener('click', e => {
     const rect = progressEl.getBoundingClientRect();
     const frac = (e.clientX - rect.left) / rect.width;
+    if (SpotifyAPI.isLoggedIn()) {
+      const dur = TRACKS[currentTrack]?.duration || 200;
+      SpotifyAPI.seekTo(Math.round(frac * dur * 1000));
+    }
     progress = frac * TRACKS[currentTrack].duration;
     updateProgressUI();
   });
@@ -407,6 +540,7 @@ function initPlayer() {
     const rect = vol.getBoundingClientRect();
     volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     document.getElementById('volumeFill').style.width = (volume * 100) + '%';
+    if (SpotifyAPI.isLoggedIn()) SpotifyAPI.setVolumeSDK(volume);
   });
 
   // Player like
@@ -419,8 +553,13 @@ function initPlayer() {
   // Click on any track item to load it
   document.querySelectorAll('.track-item').forEach((item, i) => {
     item.addEventListener('click', () => {
-      loadTrack(i);
-      play();
+      if (SpotifyAPI.isLoggedIn()) {
+        const uri = item.dataset.spotifyUri;
+        if (uri) SpotifyAPI.playTrack(uri);
+      } else {
+        loadTrack(i);
+        play();
+      }
     });
   });
 
@@ -428,15 +567,25 @@ function initPlayer() {
   document.querySelectorAll('.artist-play-btn').forEach((btn, i) => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      loadTrack(i % TRACKS.length);
-      play();
+      if (SpotifyAPI.isLoggedIn()) {
+        const card = btn.closest('.artist-card');
+        const uri  = card?.dataset.spotifyUri;
+        if (uri) SpotifyAPI.playContext(uri);
+      } else {
+        loadTrack(i % TRACKS.length);
+        play();
+      }
     });
   });
 
   // Hero play btn
   document.getElementById('heroPlayBtn')?.addEventListener('click', () => {
-    loadTrack(0);
-    play();
+    if (SpotifyAPI.isLoggedIn()) {
+      SpotifyAPI.resumePlayback();
+    } else {
+      loadTrack(0);
+      play();
+    }
     document.getElementById('playerBar')?.scrollIntoView({ behavior: 'smooth' });
   });
 }
@@ -549,3 +698,207 @@ function formatTime(s) {
   `;
   document.head.appendChild(style);
 })();
+
+// ─────────────────────────────────────────────
+//  SEARCH
+// ─────────────────────────────────────────────
+function initSearch() {
+  const overlay    = document.getElementById('searchOverlay');
+  const overlayBg  = document.getElementById('searchOverlayBg');
+  const closeBtn   = document.getElementById('searchCloseBtn');
+  const navBtn     = document.getElementById('navSearchBtn');
+  const input      = document.getElementById('searchInput');
+  const results    = document.getElementById('searchResults');
+  const tabs       = document.querySelectorAll('.search-tab');
+
+  if (!overlay || !input) return;
+
+  let debounceTimer = null;
+  let activeType    = 'all';   // all | track | artist | album
+  let lastQuery     = '';
+
+  // ── Open / close
+  const openSearch = () => {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => input.focus(), 80);
+  };
+  const closeSearch = () => {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    input.value = '';
+    lastQuery = '';
+    showEmpty();
+  };
+
+  navBtn?.addEventListener('click', openSearch);
+  closeBtn?.addEventListener('click', closeSearch);
+  overlayBg?.addEventListener('click', closeSearch);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || e.key === '/') {
+      e.preventDefault();
+      overlay.classList.contains('open') ? closeSearch() : openSearch();
+    }
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeSearch();
+  });
+
+  // ── Tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeType = tab.dataset.type;
+      if (lastQuery.trim()) doSearch(lastQuery);
+    });
+  });
+
+  // ── Input with debounce
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    lastQuery = q;
+    clearTimeout(debounceTimer);
+    if (!q) { showEmpty(); return; }
+    showLoading();
+    debounceTimer = setTimeout(() => doSearch(q), 350);
+  });
+
+  // ── Search execution
+  async function doSearch(query) {
+    if (!SpotifyAPI.isLoggedIn()) {
+      results.innerHTML = `<div class="search-no-results"><strong>Sign in to search</strong>Click "Sign In with Spotify" to search the full library.</div>`;
+      return;
+    }
+
+    const types = activeType === 'all' ? 'track,artist,album'
+                : activeType === 'track'  ? 'track'
+                : activeType === 'artist' ? 'artist'
+                : 'album';
+
+    const data = await SpotifyAPI.search(query, types, 8);
+    if (!data) { showEmpty(); return; }
+    renderResults(data, query);
+  }
+
+  // ── Render
+  function renderResults(data, query) {
+    const tracks  = data.tracks?.items  || [];
+    const artists = data.artists?.items || [];
+    const albums  = data.albums?.items  || [];
+
+    if (!tracks.length && !artists.length && !albums.length) {
+      results.innerHTML = `<div class="search-no-results"><strong>No results for "${query}"</strong>Try a different spelling or search term.</div>`;
+      return;
+    }
+
+    let html = '';
+
+    if (tracks.length) {
+      html += `<div class="search-section-label">Songs</div>`;
+      tracks.forEach(t => {
+        const img      = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '';
+        const artists  = t.artists?.map(a => a.name).join(', ');
+        const duration = _msToTimeSearch(t.duration_ms);
+        html += `
+          <div class="sr-track" data-uri="${t.uri}">
+            <div class="sr-track-art" style="${img ? `background-image:url(${img})` : ''}">
+              <div class="sr-track-art-overlay">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+              </div>
+            </div>
+            <div class="sr-track-info">
+              <div class="sr-track-name">${t.name}</div>
+              <div class="sr-track-meta">${artists} · ${t.album?.name || ''}</div>
+            </div>
+            <div class="sr-track-duration">${duration}</div>
+          </div>`;
+      });
+    }
+
+    if (artists.length) {
+      html += `<div class="search-section-label">Artists</div>`;
+      artists.forEach(a => {
+        const img       = a.images?.[2]?.url || a.images?.[0]?.url || '';
+        const followers = a.followers?.total ? (a.followers.total / 1_000_000).toFixed(1) + 'M followers' : '';
+        const genre     = a.genres?.[0] || 'Artist';
+        html += `
+          <div class="sr-artist" data-uri="${a.uri}">
+            <div class="sr-artist-img" style="${img ? `background-image:url(${img})` : ''}"></div>
+            <div class="sr-artist-info">
+              <div class="sr-artist-name">${a.name}</div>
+              <div class="sr-artist-followers">${followers}</div>
+            </div>
+            <span class="sr-artist-tag">${genre}</span>
+          </div>`;
+      });
+    }
+
+    if (albums.length) {
+      html += `<div class="search-section-label">Albums</div>`;
+      albums.forEach(al => {
+        const img     = al.images?.[2]?.url || al.images?.[0]?.url || '';
+        const artist  = al.artists?.map(a => a.name).join(', ');
+        const year    = al.release_date?.slice(0, 4) || '';
+        html += `
+          <div class="sr-album" data-uri="${al.uri}">
+            <div class="sr-album-art" style="${img ? `background-image:url(${img})` : ''}"></div>
+            <div class="sr-album-info">
+              <div class="sr-album-name">${al.name}</div>
+              <div class="sr-album-meta">${artist} · ${year} · ${al.total_tracks} tracks</div>
+            </div>
+            <button class="sr-album-play" title="Play album">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            </button>
+          </div>`;
+      });
+    }
+
+    results.innerHTML = html;
+
+    // Bind play events
+    results.querySelectorAll('.sr-track').forEach(el => {
+      el.addEventListener('click', () => {
+        const uri = el.dataset.uri;
+        if (uri && SpotifyAPI.isLoggedIn()) SpotifyAPI.playTrack(uri);
+      });
+    });
+
+    results.querySelectorAll('.sr-artist').forEach(el => {
+      el.addEventListener('click', () => {
+        const uri = el.dataset.uri;
+        if (uri && SpotifyAPI.isLoggedIn()) SpotifyAPI.playContext(uri);
+      });
+    });
+
+    results.querySelectorAll('.sr-album').forEach(el => {
+      el.addEventListener('click', e => {
+        if (e.target.closest('.sr-album-play') || e.currentTarget === el) {
+          const uri = el.dataset.uri;
+          if (uri && SpotifyAPI.isLoggedIn()) SpotifyAPI.playContext(uri);
+        }
+      });
+    });
+  }
+
+  function showEmpty() {
+    results.innerHTML = `
+      <div class="search-empty" id="searchEmpty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p>Search Spotify's entire library</p>
+        <span>Songs · Artists · Albums</span>
+      </div>`;
+  }
+
+  function showLoading() {
+    results.innerHTML = `<div class="search-loading"><div class="search-spinner"></div>Searching…</div>`;
+  }
+
+  function _msToTimeSearch(ms) {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+  }
+}
+
