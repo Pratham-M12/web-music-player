@@ -21,12 +21,38 @@ window.addEventListener('load', async () => {
   const spotifyCode = urlParams.get('spotify_code');
 
   if (spotifyCode) {
+    // Coming back from Spotify redirect → enter the app
     const ok = await SpotifyAPI.handleCallback(spotifyCode);
     if (ok) await onSpotifyLogin();
   } else if (SpotifyAPI.loadToken()) {
-    await onSpotifyLogin();
+    // Returning user has a saved token — show landing page first,
+    // but upgrade the Sign In button to "Continue" for instant access
+    _showContinueButton();
   }
+  // else: no token → landing page stays as-is, user must click Sign In
 });
+
+// Show a "Continue as [Name]" button on the landing page for returning users
+async function _showContinueButton() {
+  // Fetch the user's display name from /me
+  const profile = await SpotifyAPI.getCurrentUser?.();
+  const name    = profile?.display_name || 'You';
+
+  // Update the nav Sign In button
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.textContent = `▶  Continue as ${name.split(' ')[0]}`;
+    loginBtn.style.cssText = 'background:linear-gradient(135deg,#ff6b9d,#ff9a3c);color:#000;font-weight:800;border-color:transparent;';
+    loginBtn.onclick = e => { e.preventDefault(); onSpotifyLogin(); };
+  }
+
+  // Update the hero primary CTA button
+  const heroBtn = document.getElementById('heroPlayBtn');
+  if (heroBtn) {
+    heroBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M6.5 4.5l9 5.5-9 5.5V4.5z"/></svg> Continue as ${name.split(' ')[0]}`;
+    heroBtn.onclick = e => { e.preventDefault(); onSpotifyLogin(); };
+  }
+} // end _showContinueButton
 
 async function onSpotifyLogin() {
   SpotifyAPI.updateLoginUI(true);
