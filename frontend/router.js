@@ -24,6 +24,7 @@ const SonixRouter = (() => {
       case 'library': renderLibrary();      break;
       case 'artist':  renderArtist(id);     break;
       case 'album':   renderAlbum(id);      break;
+      case 'liked':   renderLikedSongs();   break;
       default:        renderHome();
     }
     if (_mainEl) _mainEl.scrollTop = 0;
@@ -98,7 +99,12 @@ const SonixRouter = (() => {
               <span>${item.name}</span>
               <button class="snx-quick-play">${_playIcon()}</button>
             </div>`).join('')}
-        </div>`;
+        </div>
+        <div class="snx-view">
+          <h2 class="section-title">Recently Played</h2>
+          <div id="recentTracks" class="tracks-container"></div>
+        </div>
+        `;
 
     // Made For You — Top Tracks
     const tracks = topTracksData?.items || [];

@@ -6,7 +6,11 @@ const songSchema = new mongoose.Schema({
   album: String,
   duration: String,
   fileUrl: String,
-  coverImage: String
+  coverImage: String,
+  likes: {
+  type: Number,
+  default: 0
+}
 });
 
 module.exports = mongoose.model("Song", songSchema);

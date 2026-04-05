@@ -32,22 +32,38 @@
   </style>
 </head>
 <body>
+  <script src="spotify.js"></script>
+  <script src="config.js"></script>
   <div class="logo">SONIX</div>
   <div class="spinner"></div>
   <p>Connecting to Spotify...</p>
   <script>
-    // Extract the authorization code from the URL
+  (async () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const error = params.get('error');
 
     if (error) {
       document.querySelector('p').textContent = 'Auth failed: ' + error;
-    } else if (code) {
-      // Store code and redirect back to main page
-      sessionStorage.setItem('spotify_auth_code', code);
-      window.location.href = 'index.html?spotify_code=' + code;
+      return;
     }
-  </script>
+
+    if (code) {
+      try {
+        // 🔥 CALL THIS (IMPORTANT)
+        const success = await SpotifyAPI.handleCallback(code);
+
+        if (success) {
+          window.location.href = "index.html";
+        } else {
+          document.querySelector('p').textContent = 'Login failed';
+        }
+      } catch (err) {
+        console.error(err);
+        document.querySelector('p').textContent = 'Something went wrong';
+      }
+    }
+  })();
+</script>
 </body>
 </html>

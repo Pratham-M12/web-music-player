@@ -58,6 +58,41 @@ async function onSpotifyLogin() {
   SpotifyAPI.updateLoginUI(true);
   SpotifyAPI.initSDK();
 
+  // 🔥 STEP 3 — Sync player UI with Spotify
+  SpotifyAPI.onPlayerStateChanged((state) => {
+    if (!state) return;
+    const track = state.track_window.current_track;
+    if (track) {
+      document.getElementById("playerTrackName").innerText = track.name;
+      document.getElementById("playerTrackArtist").innerText =
+        track.artists.map(a => a.name).join(", ");
+      // 🔥 STEP 4 — highlight active track
+      document.querySelectorAll('.track-item').forEach(item => {
+        item.classList.remove("active");
+      });
+      const current = document.querySelector(`[data-spotify-uri="${track.uri}"]`);
+      if (current) current.classList.add("active");
+    }
+  });
+
+  setTimeout(() => {
+    SpotifyAPI.onPlayerStateChanged((state) => {
+      if (!state) return;
+      const isFinished = state.paused && state.position === 0;
+      if (isFinished) {
+        console.log("Track ended → Next");
+        if (SpotifyAPI.isLoggedIn()) {
+          SpotifyAPI.nextTrackSDK();
+        }
+      }
+    });
+  }, 1500);
+
+  // wait for SDK to be ready
+  setTimeout(() => {
+    SonixRouter.navigate('home');
+  }, 1500);
+
   // ── Switch to app layout ──────────────────────────────────────
   const landing = document.getElementById('landing') ||
     document.querySelector('.hero')?.closest('body > *:not(#sonixApp):not(.navbar):not(.search-overlay):not(#cursorOuter):not(#cursorDot):not(.player-bar):not(script)');
@@ -88,6 +123,16 @@ async function onSpotifyLogin() {
 
   // ── Populate sidebar library ──────────────────────────────────
   _populateSidebar();
+
+  // 🔥 ADD THIS PART (VERY IMPORTANT)
+  await SpotifyAPI.populateTracks();
+  await SpotifyAPI.populateArtists();
+  await SpotifyAPI.populateNewReleases();
+  await SpotifyAPI.populateUserProfile();
+
+  // 🔥 ADD THIS
+  SonixRouter.navigate('home');
+  renderRecentSongs();
 }
 
 async function _populateSidebar() {
@@ -103,7 +148,7 @@ async function _populateSidebar() {
   const arts = artists?.artists?.items || [];
 
   let html = `
-    <div class="snx-sidebar-liked" data-action="navigate" data-view="library">
+    <div class="snx-sidebar-liked" data-action="navigate" data-view="liked">
       <div class="snx-liked-icon">
         <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
       </div>
@@ -581,7 +626,14 @@ function initPlayer() {
     item.addEventListener('click', () => {
       if (SpotifyAPI.isLoggedIn()) {
         const uri = item.dataset.spotifyUri;
-        if (uri) SpotifyAPI.playTrack(uri);
+        if (uri) {
+          SpotifyAPI.playTrack(uri);
+          addToRecent({
+            uri: uri,
+            name: item.querySelector('.track-name')?.innerText || "Unknown",
+            artist: item.querySelector('.track-artist')?.innerText || "Unknown"
+          });
+        }
       } else {
         loadTrack(i);
         play();
@@ -928,3 +980,97 @@ function initSearch() {
   }
 }
 
+async function renderLikedSongs() {
+  const main = document.getElementById("snxMain");
+
+  main.innerHTML = `
+    <div class="snx-view">
+      <h2 class="section-title">Liked Songs ❤️</h2>
+      <div id="likedSongsList" class="tracks-container"></div>
+    </div>
+  `;
+
+  const res = await fetch("http://localhost:5000/songs/liked");
+  const songs = await res.json();
+
+  const container = document.getElementById("likedSongsList");
+
+  if (songs.length === 0) {
+    container.innerHTML = `<p style="opacity:0.6">No liked songs yet</p>`;
+    return;
+  }
+
+  songs.forEach((song, i) => {
+    const div = document.createElement("div");
+    div.className = "track-item";
+    div.dataset.spotifyUri = song.spotifyUrl;
+
+    div.innerHTML = `
+      <span class="track-num">${i + 1}</span>
+      <div class="track-info">
+        <span class="track-name">Liked Track</span>
+        <span class="track-artist">Spotify</span>
+      </div>
+      <button class="track-like liked">❤️</button>
+    `;
+
+    // 🔥 PLAY ON CLICK
+    div.addEventListener("click", () => {
+      if (song.spotifyUrl) {
+        SpotifyAPI.playTrack(song.spotifyUrl);
+      }
+    });
+
+    container.appendChild(div);
+  });
+}
+
+let recentSongs = JSON.parse(localStorage.getItem("recentSongs")) || [];
+
+function addToRecent(song) {
+  // remove duplicate if exists
+  recentSongs = recentSongs.filter(s => s.uri !== song.uri);
+
+  // add to top
+  recentSongs.unshift(song);
+
+  // keep only 10
+  recentSongs = recentSongs.slice(0, 10);
+
+  // save
+  localStorage.setItem("recentSongs", JSON.stringify(recentSongs));
+
+  renderRecentSongs();
+}
+
+function renderRecentSongs() {
+  const container = document.getElementById("recentTracks");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (recentSongs.length === 0) {
+    container.innerHTML = `<p style="opacity:0.6">No recently played songs</p>`;
+    return;
+  }
+
+  recentSongs.forEach((song, i) => {
+    const div = document.createElement("div");
+    div.className = "track-item";
+
+    div.innerHTML = `
+      <span class="track-num">${i + 1}</span>
+      <div class="track-info">
+        <span class="track-name">${song.name}</span>
+        <span class="track-artist">${song.artist}</span>
+      </div>
+    `;
+
+    // 🔥 play on click
+    div.addEventListener("click", () => {
+      if (song.uri) SpotifyAPI.playTrack(song.uri);
+    });
+
+    container.appendChild(div);
+  });
+}

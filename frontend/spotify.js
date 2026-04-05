@@ -447,15 +447,36 @@ const SpotifyAPI = (() => {
   }
 
   function _bindLikeButtons() {
-    document.querySelectorAll('.track-like').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
+  document.querySelectorAll('.track-like').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+
+      const trackItem = btn.closest('.track-item');
+      const uri = trackItem.dataset.spotifyUri;
+
+      try {
+        const res = await fetch("http://localhost:5000/songs/like-by-uri", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ spotifyUrl: uri })
+        });
+
+        const data = await res.json();
+        console.log("LIKE RESPONSE:", data);
+
+        // Toggle UI
         const liked = btn.dataset.liked === 'true';
         btn.dataset.liked = String(!liked);
         btn.classList.toggle('liked', !liked);
-      });
+
+      } catch (err) {
+        console.error("LIKE ERROR:", err);
+      }
     });
-  }
+  });
+}
 
   function _bindArtistButtons() {
     document.querySelectorAll('.artist-play-btn').forEach(btn => {

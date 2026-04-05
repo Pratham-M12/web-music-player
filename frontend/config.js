@@ -12,7 +12,7 @@ const SPOTIFY_CONFIG = {
 
   // ✅ This is the redirect URI — must match EXACTLY what you set in your
   //    Spotify Developer Dashboard under "Redirect URIs"
-  REDIRECT_URI: 'http://127.0.0.1:5500/web-music-player/frontend/callback.html',
+  REDIRECT_URI: "http://127.0.0.1:5500/frontend/callback.html",
 
   // Scopes: what permissions your app requests from Spotify
   SCOPES: [
