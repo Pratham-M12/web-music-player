@@ -47,12 +47,7 @@
       <li><a href="#genres">Genres</a></li>
       <li><a href="#events">Live</a></li>
     </ul>
-    <!-- Search button -->
-    <button class="nav-search-btn" id="navSearchBtn" aria-label="Search" title="Search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </button>
+
     <div class="nav-actions">
       <button class="btn-ghost" id="loginBtn" onclick="SpotifyAPI.login()">Sign In with Spotify</button>
       <button class="btn-primary" id="signupBtn">Get SONIX Free</button>
@@ -186,54 +181,48 @@
 
   <!-- ═══════════════════════════════ HERO ═════════════════════════════════ -->
   <section class="hero" id="hero">
-    <div class="hero-bg">
-      <div class="hero-orb hero-orb-1"></div>
-      <div class="hero-orb hero-orb-2"></div>
-      <div class="hero-orb hero-orb-3"></div>
-      <div class="hero-grid"></div>
-      <div class="hero-noise"></div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        <span>15M+ tracks. Zero compromises.</span>
+    <canvas class="particle-canvas" id="particleCanvas"></canvas>
+    <div class="hero-edge hero-edge-l"></div>
+    <div class="hero-edge hero-edge-r"></div>
+
+    <div class="hero-inner">
+      <!-- LEFT: Text -->
+      <div class="hero-left">
+        <p class="hero-eyebrow">The music platform for the ones who feel.</p>
+        <h1 class="hero-headline">
+          <span class="hl">Stream.</span>
+          <span class="hl">Discover.</span>
+          <span class="hl">Feel every</span>
+          <span class="hl hl-accent">beat.</span>
+        </h1>
+        <div class="hero-cta-row">
+          <button class="btn-hero-main" id="heroPlayBtn">
+            START LISTENING <span class="btn-arrow">→</span>
+          </button>
+          <button class="btn-hero-outline" id="heroSigninBtn" onclick="SpotifyAPI.login()">
+            Sign in with Spotify
+          </button>
+        </div>
+        <div class="hero-stats-row">
+          <div class="hstat"><span class="hstat-n">15M+</span><span class="hstat-l">Tracks</span></div>
+          <div class="hstat-sep"></div>
+          <div class="hstat"><span class="hstat-n">2M+</span><span class="hstat-l">Artists</span></div>
+          <div class="hstat-sep"></div>
+          <div class="hstat"><span class="hstat-n">190+</span><span class="hstat-l">Countries</span></div>
+        </div>
       </div>
-      <h1 class="hero-title">
-        <span class="hero-line" data-text="FEEL">FEEL</span>
-        <span class="hero-line gradient-text" data-text="EVERY">EVERY</span>
-        <span class="hero-line" data-text="BEAT.">BEAT.</span>
-      </h1>
-      <p class="hero-sub">Music so immersive, it stops time.<br/>Curated for the ones who live for sound.</p>
-      <div class="hero-cta">
-        <button class="btn-hero-primary" id="heroPlayBtn">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6.5 4.5l9 5.5-9 5.5V4.5z"/></svg>
-          Start Listening
-        </button>
-        <button class="btn-hero-ghost">Explore Artists</button>
-      </div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num" data-target="15">0</span><span class="stat-suffix">M+</span><span class="stat-label">Tracks</span></div>
-        <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num" data-target="2">0</span><span class="stat-suffix">M+</span><span class="stat-label">Artists</span></div>
-        <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num" data-target="190">0</span><span class="stat-suffix">+</span><span class="stat-label">Countries</span></div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="vinyl-container" id="vinylContainer">
-        <div class="vinyl" id="vinyl">
-          <div class="vinyl-label">
-            <div class="vinyl-label-inner"></div>
+
+      <!-- RIGHT: Floating Musical Note -->
+      <div class="hero-right">
+        <div class="note-wrapper" id="noteWrapper">
+          <div class="note-inner" id="noteInner">
+            <img src="musical-note-hero.png" alt="Musical Note" class="note-img" />
+            <div class="note-glow-core"></div>
           </div>
         </div>
-        <div class="vinyl-glow"></div>
-        <div class="vinyl-rings">
-          <div class="ring ring-1"></div>
-          <div class="ring ring-2"></div>
-          <div class="ring ring-3"></div>
-        </div>
       </div>
     </div>
+
     <div class="hero-scroll-hint">
       <div class="scroll-line"></div>
       <span>SCROLL</span>
@@ -862,7 +851,7 @@
   </footer>
 
   <!-- ═══════════════════════════════ MUSIC PLAYER ═══════════════════════════════ -->
-  <div class="player-bar" id="playerBar">
+  <div class="player-bar" id="playerBar" style="display:none">
     <div class="player-track">
       <div class="player-art player-art-1" id="playerArt"></div>
       <div class="player-track-info">
@@ -919,5 +908,69 @@
   <script src="spotify.js"></script>
   <script src="router.js"></script>
   <script src="app.js"></script>
+
+  <!-- ═══ BROADWAY PARTICLE SYSTEM + NOTE PARALLAX ═══ -->
+  <script>
+  (function(){
+    const canvas = document.getElementById('particleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Particle class
+    function Particle() { this.reset(); }
+    Particle.prototype.reset = function() {
+      // Concentrate particles around the right side (note area)
+      this.x  = W * 0.5 + Math.random() * W * 0.55;
+      this.y  = Math.random() * H;
+      this.r  = Math.random() * 2.5 + 0.5;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = -(Math.random() * 0.8 + 0.2);
+      this.life = Math.random();
+      this.maxLife = Math.random() * 0.012 + 0.004;
+      // Alternate between gold and purple
+      const isGold = Math.random() > 0.45;
+      this.color = isGold
+        ? `hsla(${38 + Math.random()*12},95%,${65+Math.random()*20}%,`
+        : `hsla(${260 + Math.random()*20},85%,${68+Math.random()*18}%,`;
+    };
+    Particle.prototype.update = function() {
+      this.x  += this.vx;
+      this.y  += this.vy;
+      this.life -= this.maxLife;
+      if (this.life <= 0) this.reset();
+    };
+    Particle.prototype.draw = function() {
+      const alpha = Math.max(0, this.life);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = this.color + alpha + ')';
+      ctx.fill();
+    };
+
+    // Init particles
+    for (let i = 0; i < 120; i++) {
+      const p = new Particle();
+      p.life = Math.random(); // stagger starting life
+      particles.push(p);
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    // Mouse parallax handled by GSAP in app.js
+  })();
+  </script>
 </body>
 </html>

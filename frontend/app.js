@@ -29,7 +29,8 @@ window.addEventListener('load', async () => {
     // but upgrade the Sign In button to "Continue" for instant access
     _showContinueButton();
   }
-  // else: no token → landing page stays as-is, user must click Sign In
+  // Load real Spotify data on landing page for ALL visitors (Client Credentials)
+  populateLandingData();
 });
 
 // Show a "Continue as [Name]" button on the landing page for returning users
@@ -46,6 +47,9 @@ async function _showContinueButton() {
     loginBtn.onclick = e => { e.preventDefault(); onSpotifyLogin(); };
   }
 
+  // Pre-populate landing page with real Spotify data
+  populateLandingData();
+
   // Update the hero primary CTA button
   const heroBtn = document.getElementById('heroPlayBtn');
   if (heroBtn) {
@@ -54,39 +58,183 @@ async function _showContinueButton() {
   }
 } // end _showContinueButton
 
+// ─────────────────────────────────────────────
+//  LANDING PAGE — REAL SPOTIFY DATA
+//  Uses Client Credentials flow (public token, no login needed)
+// ─────────────────────────────────────────────
+async function populateLandingData() {
+  try {
+    // 1. Get a public access token via Client Credentials
+    const tokRes = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type:    'client_credentials',
+        client_id:     SPOTIFY_CONFIG.CLIENT_ID,
+        client_secret: SPOTIFY_CONFIG.CLIENT_SECRET,
+      }),
+    });
+    const tokData = await tokRes.json();
+    const token = tokData.access_token;
+    if (!token) { console.warn('[SONIX] Client credentials token failed'); return; }
+
+    const api = (path) => fetch('https://api.spotify.com/v1' + path, {
+      headers: { Authorization: 'Bearer ' + token }
+    }).then(r => r.ok ? r.json() : null);
+
+    // ── 2. Populate Tracks (Global Top 50 playlist)
+    const topPlaylist = await api('/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks?limit=5&market=IN');
+    if (topPlaylist?.items?.length) {
+      const list = document.querySelector('.tracks-list');
+      if (list) {
+        list.innerHTML = '';
+        topPlaylist.items.forEach(({ track }, i) => {
+          if (!track) return;
+          const img     = track.album?.images?.[1]?.url || track.album?.images?.[0]?.url || '';
+          const artists = track.artists?.map(a => a.name).join(', ') || '';
+          const duration = _msToMin(track.duration_ms);
+          const pop     = track.popularity || 75;
+          list.insertAdjacentHTML('beforeend', `
+            <div class="track-item" data-spotify-uri="${track.uri}" style="cursor:pointer">
+              <div class="track-num">${String(i+1).padStart(2,'0')}</div>
+              <div class="track-cover" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}">
+                <div class="track-play-overlay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg></div>
+              </div>
+              <div class="track-info">
+                <span class="track-title">${track.name}</span>
+                <span class="track-artist">${artists}</span>
+              </div>
+              <div class="track-album">${track.album?.name || ''}</div>
+              <div class="track-bar"><div class="track-bar-fill" style="width:${pop}%"></div></div>
+              <div class="track-plays">${(track.popularity||70)}% pop.</div>
+              <div class="track-duration">${duration}</div>
+              <button class="track-like" data-liked="false">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </button>
+            </div>`);
+        });
+      }
+
+      // Also update the ticker with real song names
+      const tickerInner = document.querySelector('.ticker-track');
+      if (tickerInner) {
+        const names = topPlaylist.items.slice(0,8).map(({track}) =>
+          `<span>${track?.name || ''}</span><span class="ticker-sep">◆</span><span>${track?.artists?.[0]?.name || ''}</span>`
+        ).join('<span class="ticker-sep"> — </span>');
+        tickerInner.innerHTML = names + names; // duplicate for seamless loop
+      }
+    }
+
+    // ── 3. Populate Artists (from Global Top 50 unique artists)
+    const artistsTrack = document.getElementById('artistsTrack');
+    if (artistsTrack && topPlaylist?.items) {
+      // Collect unique artist IDs from top tracks
+      const seen = new Set();
+      const artistIds = [];
+      topPlaylist.items.forEach(({track}) => {
+        track?.artists?.forEach(a => {
+          if (!seen.has(a.id) && artistIds.length < 6) { seen.add(a.id); artistIds.push(a.id); }
+        });
+      });
+
+      if (artistIds.length) {
+        const artistData = await api(`/artists?ids=${artistIds.join(',')}`);
+        if (artistData?.artists?.length) {
+          artistsTrack.innerHTML = '';
+          artistData.artists.forEach((artist, i) => {
+            const img       = artist.images?.[1]?.url || artist.images?.[0]?.url || '';
+            const followers = artist.followers?.total
+              ? (artist.followers.total >= 1e6
+                  ? (artist.followers.total/1e6).toFixed(1)+'M'
+                  : (artist.followers.total/1e3).toFixed(0)+'K') + ' followers'
+              : '';
+            const genre = artist.genres?.[0] || 'Music';
+            artistsTrack.insertAdjacentHTML('beforeend', `
+              <div class="artist-card" data-index="${i}">
+                <div class="artist-img-wrap">
+                  <div class="artist-img" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}"></div>
+                  <div class="artist-overlay">
+                    <button class="artist-play-btn">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="artist-info">
+                  <span class="artist-genre">${genre.charAt(0).toUpperCase()+genre.slice(1)}</span>
+                  <h3 class="artist-name">${artist.name}</h3>
+                  <span class="artist-listeners">${followers}</span>
+                </div>
+                <div class="artist-rank">#${i+1}</div>
+              </div>`);
+          });
+        }
+      }
+    }
+
+    // ── 4. Populate New Releases (albums)
+    const releases = await api('/browse/new-releases?limit=4&country=IN');
+    const albums   = releases?.albums?.items;
+    if (albums?.length) {
+      albums.slice(0, 2).forEach((album, i) => {
+        const img        = album.images?.[0]?.url;
+        const panelArt   = document.querySelectorAll('.album-art')[i];
+        const panelTitle = document.querySelectorAll('.album-panel-title')[i];
+        const panelArtist = document.querySelectorAll('.album-panel-artist')[i];
+        const panelMeta  = document.querySelectorAll('.album-panel-meta')[i];
+        const panelTag   = document.querySelectorAll('.album-panel-tag')[i];
+
+        if (panelArt && img) panelArt.style.cssText = `background:url('${img}') center/cover;`;
+        if (panelTitle)  panelTitle.textContent   = album.name;
+        if (panelArtist) panelArtist.textContent  = album.artists?.map(a=>a.name).join(', ') || '';
+        if (panelMeta)   panelMeta.innerHTML      = `<span>${album.total_tracks} Tracks</span><span>—</span><span>${album.release_date?.slice(0,4)||''}</span>`;
+        if (panelTag)    panelTag.textContent      = 'NEW RELEASE';
+      });
+    }
+
+  } catch (err) {
+    console.warn('[SONIX] Landing data fetch failed:', err?.message);
+  }
+}
+
+function _msToMin(ms) {
+  if (!ms) return '0:00';
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+}
+
 async function onSpotifyLogin() {
   SpotifyAPI.updateLoginUI(true);
   SpotifyAPI.initSDK();
 
   // 🔥 STEP 3 — Sync player UI with Spotify
-  SpotifyAPI.onPlayerStateChanged((state) => {
-    if (!state) return;
-    const track = state.track_window.current_track;
-    if (track) {
-      document.getElementById("playerTrackName").innerText = track.name;
-      document.getElementById("playerTrackArtist").innerText =
-        track.artists.map(a => a.name).join(", ");
-      // 🔥 STEP 4 — highlight active track
-      document.querySelectorAll('.track-item').forEach(item => {
-        item.classList.remove("active");
-      });
-      const current = document.querySelector(`[data-spotify-uri="${track.uri}"]`);
-      if (current) current.classList.add("active");
-    }
-  });
+  // SpotifyAPI.onPlayerStateChanged((state) => {
+  //   if (!state) return;
+  //   const track = state.track_window.current_track;
+  //   if (track) {
+  //     document.getElementById("playerTrackName").innerText = track.name;
+  //     document.getElementById("playerTrackArtist").innerText =
+  //       track.artists.map(a => a.name).join(", ");
+  //     // 🔥 STEP 4 — highlight active track
+  //     document.querySelectorAll('.track-item').forEach(item => {
+  //       item.classList.remove("active");
+  //     });
+  //     const current = document.querySelector(`[data-spotify-uri="${track.uri}"]`);
+  //     if (current) current.classList.add("active");
+  //   }
+  // });
 
-  setTimeout(() => {
-    SpotifyAPI.onPlayerStateChanged((state) => {
-      if (!state) return;
-      const isFinished = state.paused && state.position === 0;
-      if (isFinished) {
-        console.log("Track ended → Next");
-        if (SpotifyAPI.isLoggedIn()) {
-          SpotifyAPI.nextTrackSDK();
-        }
-      }
-    });
-  }, 1500);
+  // setTimeout(() => {
+  //   SpotifyAPI.onPlayerStateChanged((state) => {
+  //     if (!state) return;
+  //     const isFinished = state.paused && state.position === 0;
+  //     if (isFinished) {
+  //       console.log("Track ended → Next");
+  //       if (SpotifyAPI.isLoggedIn()) {
+  //         SpotifyAPI.nextTrackSDK();
+  //       }
+  //     }
+  //   });
+  // }, 1500);
 
   // wait for SDK to be ready
   setTimeout(() => {
@@ -109,6 +257,10 @@ async function onSpotifyLogin() {
     appEl.style.cssText = 'display:flex;position:fixed;inset:0;bottom:80px;z-index:100;';
   }
   if (navbar) navbar.style.display = 'none';
+
+  // Reveal player bar now that user is logged in
+  const playerBar = document.getElementById('playerBar');
+  if (playerBar) playerBar.style.display = 'flex';
 
   // ── Sidebar nav binding ───────────────────────────────────────
   document.querySelectorAll('.snx-nav-item').forEach(btn => {
@@ -257,14 +409,14 @@ function initGSAP() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // ── Section titles reveal
+  // ── Section titles reveal (opacity fade + lift)
   document.querySelectorAll('.section-title').forEach(el => {
     gsap.fromTo(el,
-      { clipPath: 'inset(0 0 100% 0)', y: 20 },
+      { opacity: 0, y: 36 },
       {
-        clipPath: 'inset(0 0 0% 0)', y: 0, duration: 1,
+        opacity: 1, y: 0, duration: 1,
         ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+        scrollTrigger: { trigger: el, start: 'top 90%', once: true }
       }
     );
   });
@@ -377,6 +529,43 @@ function initGSAP() {
     scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 }
   });
 
+  // ── Note parallax (Broadway feather scroll effect)
+  const noteWrapper = document.getElementById('noteWrapper');
+  if (noteWrapper) {
+    // Scroll-driven: rotates + drifts as hero scrolls out — Broadway feather style
+    gsap.to(noteWrapper, {
+      rotation: 72,
+      y: 460,
+      x: 130,
+      scale: 0.58,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.8
+      }
+    });
+
+    // Mouse parallax — smooth quickTo
+    const xTo = gsap.quickTo(noteWrapper, 'x', { duration: 0.6, ease: 'power2.out' });
+    const yTo = gsap.quickTo(noteWrapper, 'y', { duration: 0.6, ease: 'power2.out' });
+    let scrollOffset = 0;
+    ScrollTrigger.create({
+      trigger: '.hero', start: 'top top', end: 'bottom top',
+      onUpdate: (self) => { scrollOffset = self.progress * 460; }
+    });
+    document.addEventListener('mousemove', (e) => {
+      const xFrac = (e.clientX / window.innerWidth  - 0.5) * 24;
+      const yFrac = (e.clientY / window.innerHeight - 0.5) * 14 + scrollOffset;
+      xTo(xFrac + 130 * (scrollOffset / 460));
+      yTo(yFrac);
+    });
+
+    // Animated waveform bars injected below hero stats
+    initHeroWaveform();
+  }
+
   // ── Big background text parallax
   gsap.to('.trending-bg-text', {
     x: -80,
@@ -385,6 +574,31 @@ function initGSAP() {
 
   // ── Counters
   initCountersGSAP();
+}
+
+// ─────────────────────────────────────────────
+//  HERO WAVEFORM BARS (decorative visualizer)
+// ─────────────────────────────────────────────
+function initHeroWaveform() {
+  const heroStats = document.querySelector('.hero-stats');
+  if (!heroStats || document.querySelector('.hero-waveform')) return;
+
+  // Heights for natural-looking waveform shape
+  const heights = [22, 36, 52, 44, 62, 38, 55, 30, 48, 40, 58, 34, 46, 28, 42];
+  const delays  = [0,.14,.07,.22,.05,.18,.11,.3,.03,.25,.09,.2,.06,.28,.15];
+
+  const waveform = document.createElement('div');
+  waveform.className = 'hero-waveform';
+  waveform.setAttribute('aria-hidden','true');
+
+  heights.forEach((h, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'wv-bar';
+    bar.style.cssText = `height:${h}px;animation-delay:${delays[i]}s;animation-duration:${0.9 + Math.random()*0.5}s`;
+    waveform.appendChild(bar);
+  });
+
+  heroStats.insertAdjacentElement('afterend', waveform);
 }
 
 // ─────────────────────────────────────────────
