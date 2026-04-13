@@ -50,7 +50,7 @@
 
     <div class="nav-actions">
       <button class="btn-ghost" id="loginBtn" onclick="SpotifyAPI.login()">Sign In with Spotify</button>
-      <button class="btn-primary" id="signupBtn">Get SONIX Free</button>
+      <button class="btn-primary" id="signupBtn" onclick="SonixAuth.open()">Get SONIX Free</button>
       <!-- Shown after login -->
       <div id="userMenu" style="display:none;align-items:center;gap:10px">
         <img id="userAvatar" src="" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #ff6b9d">
@@ -152,7 +152,7 @@
       <div class="snx-sidebar-lib">
         <div class="snx-sidebar-lib-header">
           <span>Your Library</span>
-          <button class="snx-sidebar-create" title="Create playlist">
+          <button class="snx-sidebar-create" title="Create playlist" onclick="SonixPlaylist.openCreate()">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
           </button>
         </div>
@@ -907,6 +907,7 @@
   <script src="config.js"></script>
   <script src="spotify.js"></script>
   <script src="router.js"></script>
+  <script src="features.js"></script>
   <script src="app.js"></script>
 
   <!-- ═══ BROADWAY PARTICLE SYSTEM + NOTE PARALLAX ═══ -->

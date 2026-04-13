@@ -5,14 +5,19 @@ const songSchema = new mongoose.Schema(
     title: {
       type: String,
       default: "",
+      trim: true,
+      maxlength: [200, "Title too long"],
     },
     artist: {
       type: String,
       default: "",
+      trim: true,
+      maxlength: [200, "Artist name too long"],
     },
     album: {
       type: String,
       default: "",
+      trim: true,
     },
     duration: {
       type: String,
@@ -22,6 +27,7 @@ const songSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
+      index: true,
     },
     fileUrl: {
       type: String,
@@ -34,6 +40,7 @@ const songSchema = new mongoose.Schema(
     likes: {
       type: Number,
       default: 0,
+      min: [0, "Likes cannot be negative"],
     },
   },
   { timestamps: true }

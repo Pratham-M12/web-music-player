@@ -51,7 +51,7 @@ const SonixRouter = (() => {
     return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>`;
   }
   function _img(url, fallback = 'linear-gradient(135deg,#1a0533,#ff6b9d)') {
-    return url ? `background:url(${url}) center/cover no-repeat` : `background:${fallback}`;
+    return url ? `background:url(${escapeHTML(url)}) center/cover no-repeat` : `background:${fallback}`;
   }
 
   function _loading() {
@@ -88,15 +88,15 @@ const SonixRouter = (() => {
     let html = `
       <div class="snx-home">
         <div class="snx-greeting">
-          <h1>${greeting}, ${name}</h1>
+          <h1>${escapeHTML(greeting)}, ${escapeHTML(name)}</h1>
         </div>
 
         <!-- Quick picks grid -->
         <div class="snx-quick-grid">
           ${quickItems.map(item => `
-            <div class="snx-quick-card" data-type="${item.type}" data-id="${item.id}" data-uri="${item.uri}">
+            <div class="snx-quick-card" data-type="${escapeHTML(item.type)}" data-id="${escapeHTML(item.id)}" data-uri="${escapeHTML(item.uri)}">
               <div class="snx-quick-img" style="${_img(item.img)}"></div>
-              <span>${item.name}</span>
+              <span>${escapeHTML(item.name)}</span>
               <button class="snx-quick-play">${_playIcon()}</button>
             </div>`).join('')}
         </div>
@@ -117,12 +117,12 @@ const SonixRouter = (() => {
           </div>
           <div class="snx-cards-scroll">
             ${tracks.map(t => `
-              <div class="snx-card" data-uri="${t.uri}" data-type="track">
+              <div class="snx-card" data-uri="${escapeHTML(t.uri)}" data-type="track">
                 <div class="snx-card-img" style="${_img(t.album?.images?.[1]?.url || t.album?.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${t.name}</div>
-                <div class="snx-card-sub">${t.artists?.map(a => a.name).join(', ')}</div>
+                <div class="snx-card-name">${escapeHTML(t.name)}</div>
+                <div class="snx-card-sub">${escapeHTML(t.artists?.map(a => a.name).join(', '))}</div>
               </div>`).join('')}
           </div>
         </div>`;
@@ -138,11 +138,11 @@ const SonixRouter = (() => {
           </div>
           <div class="snx-cards-scroll">
             ${artists.map(a => `
-              <div class="snx-card snx-card-artist" data-id="${a.id}" data-type="artist">
+              <div class="snx-card snx-card-artist" data-id="${escapeHTML(a.id)}" data-type="artist">
                 <div class="snx-card-img snx-card-img-circle" style="${_img(a.images?.[1]?.url || a.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${a.name}</div>
+                <div class="snx-card-name">${escapeHTML(a.name)}</div>
                 <div class="snx-card-sub">Artist</div>
               </div>`).join('')}
           </div>
@@ -157,12 +157,12 @@ const SonixRouter = (() => {
           <div class="snx-row-header"><h2>New Releases</h2></div>
           <div class="snx-cards-scroll">
             ${releases.map(al => `
-              <div class="snx-card" data-id="${al.id}" data-type="album">
+              <div class="snx-card" data-id="${escapeHTML(al.id)}" data-type="album">
                 <div class="snx-card-img" style="${_img(al.images?.[1]?.url || al.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${al.name}</div>
-                <div class="snx-card-sub">${al.artists?.map(a => a.name).join(', ')}</div>
+                <div class="snx-card-name">${escapeHTML(al.name)}</div>
+                <div class="snx-card-sub">${escapeHTML(al.artists?.map(a => a.name).join(', '))}</div>
               </div>`).join('')}
           </div>
         </div>`;
@@ -176,12 +176,12 @@ const SonixRouter = (() => {
           <div class="snx-row-header"><h2>${featuredData?.message || 'Featured'}</h2></div>
           <div class="snx-cards-scroll">
             ${featured.map(pl => `
-              <div class="snx-card" data-uri="${pl.uri}" data-type="playlist">
+              <div class="snx-card" data-uri="${escapeHTML(pl.uri)}" data-type="playlist">
                 <div class="snx-card-img" style="${_img(pl.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${pl.name}</div>
-                <div class="snx-card-sub">${pl.description || pl.owner?.display_name || ''}</div>
+                <div class="snx-card-name">${escapeHTML(pl.name)}</div>
+                <div class="snx-card-sub">${escapeHTML(pl.description || pl.owner?.display_name || '')}</div>
               </div>`).join('')}
           </div>
         </div>`;
@@ -280,13 +280,13 @@ const SonixRouter = (() => {
             <h2>Songs</h2>
             <div class="snx-track-list">
               ${tracks.slice(0, 4).map(t => `
-                <div class="snx-track-row" data-uri="${t.uri}">
+                <div class="snx-track-row" data-uri="${escapeHTML(t.uri)}">
                   <div class="snx-trow-art" style="${_img(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url)}">
                     <div class="snx-trow-overlay">${_playIcon()}</div>
                   </div>
                   <div class="snx-trow-info">
-                    <div class="snx-trow-name">${t.name}</div>
-                    <div class="snx-trow-sub">${t.artists?.map(a => a.name).join(', ')}</div>
+                    <div class="snx-trow-name">${escapeHTML(t.name)}</div>
+                    <div class="snx-trow-sub">${escapeHTML(t.artists?.map(a => a.name).join(', '))}</div>
                   </div>
                   <div class="snx-trow-dur">${_msToTime(t.duration_ms)}</div>
                 </div>`).join('')}
@@ -302,11 +302,11 @@ const SonixRouter = (() => {
           <div class="snx-row-header"><h2>Artists</h2></div>
           <div class="snx-cards-scroll">
             ${artists.map(a => `
-              <div class="snx-card snx-card-artist" data-id="${a.id}" data-type="artist">
+              <div class="snx-card snx-card-artist" data-id="${escapeHTML(a.id)}" data-type="artist">
                 <div class="snx-card-img snx-card-img-circle" style="${_img(a.images?.[1]?.url || a.images?.[0]?.url, 'linear-gradient(135deg,#1a0533,#c77dff)')}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${a.name}</div>
+                <div class="snx-card-name">${escapeHTML(a.name)}</div>
                 <div class="snx-card-sub">Artist · ${_fmtFollowers(a.followers?.total)} followers</div>
               </div>`).join('')}
           </div>
@@ -320,12 +320,12 @@ const SonixRouter = (() => {
           <div class="snx-row-header"><h2>Albums</h2></div>
           <div class="snx-cards-scroll">
             ${albums.map(al => `
-              <div class="snx-card" data-id="${al.id}" data-type="album">
+              <div class="snx-card" data-id="${escapeHTML(al.id)}" data-type="album">
                 <div class="snx-card-img" style="${_img(al.images?.[1]?.url || al.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${al.name}</div>
-                <div class="snx-card-sub">${al.release_date?.slice(0, 4)} · ${al.artists?.map(a => a.name).join(', ')}</div>
+                <div class="snx-card-name">${escapeHTML(al.name)}</div>
+                <div class="snx-card-sub">${al.release_date?.slice(0, 4)} · ${escapeHTML(al.artists?.map(a => a.name).join(', '))}</div>
               </div>`).join('')}
           </div>
         </div>`;
@@ -363,8 +363,8 @@ const SonixRouter = (() => {
             <div class="snx-artist-avatar ${!img ? 'snx-artist-avatar-placeholder' : ''}" style="${_img(img, 'linear-gradient(135deg,#1a0533,#c77dff)')}"></div>
             <div class="snx-artist-hero-info">
               <span class="snx-verified">✓ Verified Artist</span>
-              <h1 class="snx-artist-name">${artist.name}</h1>
-              <p class="snx-artist-followers">${followers ? `${followers} followers` : ''}${genre ? ` · ${genre}` : ''}</p>
+              <h1 class="snx-artist-name">${escapeHTML(artist.name)}</h1>
+              <p class="snx-artist-followers">${followers ? `${escapeHTML(followers)} followers` : ''}${genre ? ` · ${escapeHTML(genre)}` : ''}</p>
             </div>
           </div>
           <div class="snx-artist-hero-actions">
@@ -378,15 +378,15 @@ const SonixRouter = (() => {
           <h2>Popular</h2>
           <div class="snx-tracklist">
             ${tracks.slice(0, 10).map((t, i) => `
-              <div class="snx-tl-row" data-uri="${t.uri}">
+              <div class="snx-tl-row" data-uri="${escapeHTML(t.uri)}">
                 <div class="snx-tl-num">${i + 1}</div>
                 <div class="snx-tl-art" style="${_img(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url)}">
                   <div class="snx-tl-overlay">${_playIcon()}</div>
                 </div>
                 <div class="snx-tl-info">
-                  <div class="snx-tl-name">${t.name}</div>
+                  <div class="snx-tl-name">${escapeHTML(t.name)}</div>
                 </div>
-                <div class="snx-tl-album">${t.album?.name || ''}</div>
+                <div class="snx-tl-album">${escapeHTML(t.album?.name || '')}</div>
                 <div class="snx-tl-dur">${_msToTime(t.duration_ms)}</div>
               </div>`).join('')}
           </div>
@@ -404,8 +404,8 @@ const SonixRouter = (() => {
                 <div class="snx-card-img" style="${_img(al.images?.[1]?.url || al.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${al.name}</div>
-                <div class="snx-card-sub">${al.release_date?.slice(0, 4)} · ${al.album_type}</div>
+                <div class="snx-card-name">${escapeHTML(al.name)}</div>
+                <div class="snx-card-sub">${al.release_date?.slice(0, 4)} · ${escapeHTML(al.album_type)}</div>
               </div>`).join('')}
           </div>
         </div>` : ''}
@@ -420,7 +420,7 @@ const SonixRouter = (() => {
                 <div class="snx-card-img snx-card-img-circle" style="${_img(a.images?.[1]?.url || a.images?.[0]?.url, 'linear-gradient(135deg,#1a0533,#c77dff)')}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
-                <div class="snx-card-name">${a.name}</div>
+                <div class="snx-card-name">${escapeHTML(a.name)}</div>
                 <div class="snx-card-sub">Artist</div>
               </div>`).join('')}
           </div>
@@ -456,10 +456,10 @@ const SonixRouter = (() => {
           <div class="snx-album-cover" style="${_img(img)}"></div>
           <div class="snx-album-info">
             <span class="snx-album-type">${album.album_type?.toUpperCase() || 'ALBUM'}</span>
-            <h1 class="snx-album-title">${album.name}</h1>
+            <h1 class="snx-album-title">${escapeHTML(album.name)}</h1>
             <div class="snx-album-meta">
               ${img ? `<img src="${img}" class="snx-album-artist-img" alt="">` : ''}
-              <span class="snx-album-artist" data-type="artist" data-id="${album.artists?.[0]?.id}">${artist}</span>
+              <span class="snx-album-artist" data-type="artist" data-id="${escapeHTML(album.artists?.[0]?.id)}">${escapeHTML(artist)}</span>
               <span>·</span><span>${year}</span>
               <span>·</span><span>${total} songs</span>
               <span>·</span><span>${_msToTime(duration)}</span>
@@ -481,8 +481,8 @@ const SonixRouter = (() => {
             <div class="snx-tl-row" data-uri="${t.uri}">
               <div class="snx-tl-num">${i + 1}</div>
               <div class="snx-tl-info">
-                <div class="snx-tl-name">${t.name}</div>
-                <div class="snx-tl-sub">${t.artists?.map(a => a.name).join(', ')}</div>
+                <div class="snx-tl-name">${escapeHTML(t.name)}</div>
+                <div class="snx-tl-sub">${escapeHTML(t.artists?.map(a => a.name).join(', '))}</div>
               </div>
               <div class="snx-tl-dur">${_msToTime(t.duration_ms)}</div>
             </div>`).join('')}

@@ -4,61 +4,62 @@ const qs = require("querystring");
 const Song = require("../models/Song");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
+const { likeByUriRules, validate } = require("../middleware/validators");
 
 const router = express.Router();
 
-// GET all songs
-router.get("/", async (req, res) => {
+// ── GET all songs ──
+router.get("/", async (req, res, next) => {
   try {
-    const songs = await Song.find().sort({ createdAt: -1 });
-    res.json(songs);
+    const songs = await Song.find().sort({ createdAt: -1 }).limit(50);
+    res.json({ success: true, data: songs });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
-// SEARCH songs
-router.get("/search", async (req, res) => {
+// ── SEARCH songs ──
+router.get("/search", async (req, res, next) => {
   try {
     const { q } = req.query;
 
-    if (!q) {
-      return res.json([]);
+    if (!q || !q.trim()) {
+      return res.json({ success: true, data: [] });
     }
+
+    // Sanitize regex input to prevent ReDoS
+    const sanitized = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     const songs = await Song.find({
       $or: [
-        { title: { $regex: q, $options: "i" } },
-        { artist: { $regex: q, $options: "i" } },
-        { album: { $regex: q, $options: "i" } },
+        { title: { $regex: sanitized, $options: "i" } },
+        { artist: { $regex: sanitized, $options: "i" } },
+        { album: { $regex: sanitized, $options: "i" } },
       ],
-    });
+    }).limit(20);
 
-    res.json(songs);
+    res.json({ success: true, data: songs });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
-// ADD a song manually
-router.post("/", async (req, res) => {
+// ── ADD a song manually (protected) ──
+router.post("/", authMiddleware, async (req, res, next) => {
   try {
-    const newSong = new Song(req.body);
+    const { title, artist, album, spotifyUrl } = req.body;
+    const newSong = new Song({ title, artist, album, spotifyUrl });
     await newSong.save();
-    res.status(201).json(newSong);
+    res.status(201).json({ success: true, data: newSong });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
-// TOGGLE like by spotify uri for logged-in user
-router.put("/like-by-uri", authMiddleware, async (req, res) => {
+// ── TOGGLE like by spotify URI (protected) ──
+router.put("/like-by-uri", authMiddleware, likeByUriRules, validate, async (req, res, next) => {
   try {
     const { spotifyUrl, title, artist, album, coverImage } = req.body;
-
-    if (!spotifyUrl) {
-      return res.status(400).json({ message: "spotifyUrl is required" });
-    }
 
     let song = await Song.findOne({ spotifyUrl });
 
@@ -93,27 +94,28 @@ router.put("/like-by-uri", authMiddleware, async (req, res) => {
     await song.save();
 
     res.json({
+      success: true,
       message: alreadyLiked ? "Song unliked" : "Song liked",
       liked: !alreadyLiked,
-      song,
+      data: song,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
-// GET liked songs of logged-in user
-router.get("/liked", authMiddleware, async (req, res) => {
+// ── GET liked songs of logged-in user ──
+router.get("/liked", authMiddleware, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).populate("likedSongs");
-    res.json(user.likedSongs);
+    res.json({ success: true, data: user.likedSongs });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
-// IMPORT spotify new releases into DB
-router.get("/import", async (req, res) => {
+// ── IMPORT Spotify new releases into DB (protected) ──
+router.get("/import", authMiddleware, async (req, res, next) => {
   try {
     const tokenRes = await axios.post(
       "https://accounts.spotify.com/api/token",
@@ -160,9 +162,9 @@ router.get("/import", async (req, res) => {
       savedSongs.push(song);
     }
 
-    res.json(savedSongs);
+    res.json({ success: true, imported: savedSongs.length, data: savedSongs });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 

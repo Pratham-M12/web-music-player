@@ -1,11 +1,19 @@
 const jwt = require("jsonwebtoken");
 
+/**
+ * JWT authentication middleware.
+ * Extracts and verifies the Bearer token from the Authorization header.
+ * Attaches decoded user data to req.user on success.
+ */
 module.exports = function (req, res, next) {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).json({
+        success: false,
+        error: "Authentication required",
+      });
     }
 
     const token = authHeader.split(" ")[1];
@@ -14,6 +22,7 @@ module.exports = function (req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+    // Forward JWT-specific errors to the centralized error handler
+    next(err);
   }
 };

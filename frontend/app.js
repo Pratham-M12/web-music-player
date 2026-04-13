@@ -64,16 +64,8 @@ async function _showContinueButton() {
 // ─────────────────────────────────────────────
 async function populateLandingData() {
   try {
-    // 1. Get a public access token via Client Credentials
-    const tokRes = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type:    'client_credentials',
-        client_id:     SPOTIFY_CONFIG.CLIENT_ID,
-        client_secret: SPOTIFY_CONFIG.CLIENT_SECRET,
-      }),
-    });
+    // 1. Get a public access token via backend proxy (CLIENT_SECRET stays server-side)
+    const tokRes = await fetch(`${BACKEND_URL}/spotify/public-token`);
     const tokData = await tokRes.json();
     const token = tokData.access_token;
     if (!token) { console.warn('[SONIX] Client credentials token failed'); return; }
@@ -95,16 +87,16 @@ async function populateLandingData() {
           const duration = _msToMin(track.duration_ms);
           const pop     = track.popularity || 75;
           list.insertAdjacentHTML('beforeend', `
-            <div class="track-item" data-spotify-uri="${track.uri}" style="cursor:pointer">
+            <div class="track-item" data-spotify-uri="${escapeHTML(track.uri)}" style="cursor:pointer">
               <div class="track-num">${String(i+1).padStart(2,'0')}</div>
-              <div class="track-cover" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}">
+              <div class="track-cover" style="${img ? `background:url(${escapeHTML(img)}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}">
                 <div class="track-play-overlay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg></div>
               </div>
               <div class="track-info">
-                <span class="track-title">${track.name}</span>
-                <span class="track-artist">${artists}</span>
+                <span class="track-title">${escapeHTML(track.name)}</span>
+                <span class="track-artist">${escapeHTML(artists)}</span>
               </div>
-              <div class="track-album">${track.album?.name || ''}</div>
+              <div class="track-album">${escapeHTML(track.album?.name || '')}</div>
               <div class="track-bar"><div class="track-bar-fill" style="width:${pop}%"></div></div>
               <div class="track-plays">${(track.popularity||70)}% pop.</div>
               <div class="track-duration">${duration}</div>
@@ -119,7 +111,7 @@ async function populateLandingData() {
       const tickerInner = document.querySelector('.ticker-track');
       if (tickerInner) {
         const names = topPlaylist.items.slice(0,8).map(({track}) =>
-          `<span>${track?.name || ''}</span><span class="ticker-sep">◆</span><span>${track?.artists?.[0]?.name || ''}</span>`
+          `<span>${escapeHTML(track?.name || '')}</span><span class="ticker-sep">◆</span><span>${escapeHTML(track?.artists?.[0]?.name || '')}</span>`
         ).join('<span class="ticker-sep"> — </span>');
         tickerInner.innerHTML = names + names; // duplicate for seamless loop
       }
@@ -152,7 +144,7 @@ async function populateLandingData() {
             artistsTrack.insertAdjacentHTML('beforeend', `
               <div class="artist-card" data-index="${i}">
                 <div class="artist-img-wrap">
-                  <div class="artist-img" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}"></div>
+                  <div class="artist-img" style="${img ? `background:url(${escapeHTML(img)}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}"></div>
                   <div class="artist-overlay">
                     <button class="artist-play-btn">
                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
@@ -160,9 +152,9 @@ async function populateLandingData() {
                   </div>
                 </div>
                 <div class="artist-info">
-                  <span class="artist-genre">${genre.charAt(0).toUpperCase()+genre.slice(1)}</span>
-                  <h3 class="artist-name">${artist.name}</h3>
-                  <span class="artist-listeners">${followers}</span>
+                  <span class="artist-genre">${escapeHTML(genre.charAt(0).toUpperCase()+genre.slice(1))}</span>
+                  <h3 class="artist-name">${escapeHTML(artist.name)}</h3>
+                  <span class="artist-listeners">${escapeHTML(followers)}</span>
                 </div>
                 <div class="artist-rank">#${i+1}</div>
               </div>`);
@@ -271,18 +263,24 @@ async function onSpotifyLogin() {
 
   // ── Initialize router with main content el ───────────────────
   const mainEl = document.getElementById('snxMain');
-  if (mainEl) SonixRouter.init(mainEl);
+  if (mainEl) {
+    SonixRouter.init(mainEl);
+    // Bind context menu to app view (right-click on tracks)
+    SonixContextMenu.bindToContainer(mainEl);
+  }
 
   // ── Populate sidebar library ──────────────────────────────────
   _populateSidebar();
 
-  // 🔥 ADD THIS PART (VERY IMPORTANT)
+  // Bind context menu to landing page tracks too
+  const landingTracks = document.querySelector('.tracks-list');
+  if (landingTracks) SonixContextMenu.bindToContainer(landingTracks);
+
   await SpotifyAPI.populateTracks();
   await SpotifyAPI.populateArtists();
   await SpotifyAPI.populateNewReleases();
   await SpotifyAPI.populateUserProfile();
 
-  // 🔥 ADD THIS
   SonixRouter.navigate('home');
   renderRecentSongs();
 }
@@ -1204,9 +1202,14 @@ async function renderLikedSongs() {
     </div>
   `;
 
-  const res = await fetch("http://localhost:5000/songs/liked");
-  const songs = await res.json();
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BACKEND_URL}/songs/liked`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
+  const songs = await res.json();
   const container = document.getElementById("likedSongsList");
 
   if (songs.length === 0) {
@@ -1244,18 +1247,33 @@ let recentSongs = JSON.parse(localStorage.getItem("recentSongs")) || [];
 function addToRecent(song) {
   // remove duplicate if exists
   recentSongs = recentSongs.filter(s => s.uri !== song.uri);
-
   // add to top
   recentSongs.unshift(song);
-
   // keep only 10
   recentSongs = recentSongs.slice(0, 10);
-
   // save
   localStorage.setItem("recentSongs", JSON.stringify(recentSongs));
 
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    fetch(`${BACKEND_URL}/history`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        spotifyUrl: song.uri,
+        title: song.name,
+        artist: song.artist,
+        coverImage: song.coverImage || "",
+      }),
+    }).catch(err => console.error("History save error:", err));
+  }
   renderRecentSongs();
 }
+
 
 function renderRecentSongs() {
   const container = document.getElementById("recentTracks");
@@ -1275,8 +1293,8 @@ function renderRecentSongs() {
     div.innerHTML = `
       <span class="track-num">${i + 1}</span>
       <div class="track-info">
-        <span class="track-name">${song.name}</span>
-        <span class="track-artist">${song.artist}</span>
+        <span class="track-name">${escapeHTML(song.name)}</span>
+        <span class="track-artist">${escapeHTML(song.artist)}</span>
       </div>
     `;
 

@@ -2,24 +2,31 @@ const express = require("express");
 const User = require("../models/User");
 const Song = require("../models/Song");
 const Playlist = require("../models/Playlist");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+// ── Get platform stats (protected — don't expose counts to the public) ──
+router.get("/", authMiddleware, async (req, res, next) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const totalSongs = await Song.countDocuments();
-    const totalPlaylists = await Playlist.countDocuments();
-    const mostLikedSongs = await Song.find().sort({ likes: -1 }).limit(5);
+    const [totalUsers, totalSongs, totalPlaylists, mostLikedSongs] = await Promise.all([
+      User.countDocuments(),
+      Song.countDocuments(),
+      Playlist.countDocuments(),
+      Song.find().sort({ likes: -1 }).limit(5).select("title artist likes coverImage"),
+    ]);
 
     res.json({
-      totalUsers,
-      totalSongs,
-      totalPlaylists,
-      mostLikedSongs,
+      success: true,
+      data: {
+        totalUsers,
+        totalSongs,
+        totalPlaylists,
+        mostLikedSongs,
+      },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 

@@ -338,18 +338,18 @@ const SpotifyAPI = (() => {
       const pop         = track.popularity || 70;
 
       list.insertAdjacentHTML('beforeend', `
-        <div class="track-item" data-spotify-uri="${track.uri}" data-track="${i}" style="cursor:pointer">
+        <div class="track-item" data-spotify-uri="${escapeHTML(track.uri)}" data-track="${i}" style="cursor:pointer">
           <div class="track-num">${String(i + 1).padStart(2, '0')}</div>
-          <div class="track-cover" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#ff6b9d)'}">
+          <div class="track-cover" style="${img ? `background:url(${escapeHTML(img)}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#ff6b9d)'}">
             <div class="track-play-overlay">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
             </div>
           </div>
           <div class="track-info">
-            <span class="track-title">${track.name}</span>
-            <span class="track-artist">${artistNames}</span>
+            <span class="track-title">${escapeHTML(track.name)}</span>
+            <span class="track-artist">${escapeHTML(artistNames)}</span>
           </div>
-          <div class="track-album">${track.album?.name || ''}</div>
+          <div class="track-album">${escapeHTML(track.album?.name || '')}</div>
           <div class="track-bar"><div class="track-bar-fill" style="width:${pop}%"></div></div>
           <div class="track-plays">${pop}% pop.</div>
           <div class="track-duration">${duration}</div>
@@ -381,9 +381,9 @@ const SpotifyAPI = (() => {
       const genreLabel = genre.charAt(0).toUpperCase() + genre.slice(1);
 
       track.insertAdjacentHTML('beforeend', `
-        <div class="artist-card" data-index="${i}" data-spotify-uri="${artist.uri}">
+        <div class="artist-card" data-index="${i}" data-spotify-uri="${escapeHTML(artist.uri)}">
           <div class="artist-img-wrap">
-            <div class="artist-img" style="${img ? `background:url(${img}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#ff6b9d)'}"></div>
+            <div class="artist-img" style="${img ? `background:url(${escapeHTML(img)}) center/cover` : 'background:linear-gradient(135deg,#1a0533,#ff6b9d)'}"></div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
@@ -391,9 +391,9 @@ const SpotifyAPI = (() => {
             </div>
           </div>
           <div class="artist-info">
-            <span class="artist-genre">${genreLabel}</span>
-            <h3 class="artist-name">${artist.name}</h3>
-            <span class="artist-listeners">${listeners}</span>
+            <span class="artist-genre">${escapeHTML(genreLabel)}</span>
+            <h3 class="artist-name">${escapeHTML(artist.name)}</h3>
+            <span class="artist-listeners">${escapeHTML(listeners)}</span>
           </div>
           <div class="artist-rank">#${i + 1}</div>
         </div>`);
@@ -455,7 +455,7 @@ const SpotifyAPI = (() => {
       const uri = trackItem.dataset.spotifyUri;
 
       try {
-        const res = await fetch("http://localhost:5000/songs/like-by-uri", {
+        const res = await fetch(`${BACKEND_URL}/songs/like-by-uri`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json"

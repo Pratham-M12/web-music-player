@@ -1,18 +1,16 @@
 /* ─────────────────────────────────────────────
    SONIX — Spotify API Configuration
-   Paste your Spotify credentials below.
    ──────────────────────────────────────────── */
 
 const SPOTIFY_CONFIG = {
-  // ✅ Paste your Spotify Client ID here:
+  // ✅ Spotify Client ID (safe to expose in frontend — it's a public identifier)
   CLIENT_ID: 'c8d9585cebdc4077ad2b92de944c865b',
 
-  // ✅ Paste your Spotify Client Secret here:
-  CLIENT_SECRET: '5af5d05b0e63431bacbfc9372448c6fc',
+  // 🔒 CLIENT_SECRET has been moved to the backend (.env)
+  //    The frontend never needs it — token exchange happens server-side.
 
-  // ✅ This is the redirect URI — must match EXACTLY what you set in your
-  //    Spotify Developer Dashboard under "Redirect URIs"
-  REDIRECT_URI: "http://127.0.0.1:5500/callback.html",
+  // ✅ Redirect URI — must match exactly what's in your Spotify Dashboard
+  REDIRECT_URI: "http://127.0.0.1:5500/frontend/callback.html",
 
   // Scopes: what permissions your app requests from Spotify
   SCOPES: [
@@ -23,5 +21,17 @@ const SPOTIFY_CONFIG = {
     'playlist-read-private',
     'user-library-read',
     'user-top-read',
+    'user-follow-read',
   ].join(' '),
 };
+
+// ✅ Centralized backend URL — change this when deploying to production
+const BACKEND_URL = 'http://localhost:5000';
+
+// ✅ HTML escape helper — prevents XSS when inserting API data into the DOM
+function escapeHTML(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
