@@ -1,4 +1,5 @@
 const { body, param, validationResult } = require("express-validator");
+const { VALID_GENRES } = require("../models/UserProfile");
 
 /**
  * Middleware to check validation results and return 400 if invalid.
@@ -63,6 +64,51 @@ const objectIdParam = (paramName = "id") => [
   param(paramName).isMongoId().withMessage(`Invalid ${paramName} format`),
 ];
 
+// ── Profile validations ──
+const updateProfileRules = [
+  body("displayName")
+    .optional()
+    .trim()
+    .isLength({ max: 40 }).withMessage("Display name cannot exceed 40 characters"),
+
+  body("bio")
+    .optional()
+    .trim()
+    .isLength({ max: 200 }).withMessage("Bio cannot exceed 200 characters"),
+
+  body("avatarUrl")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL({ require_protocol: true, protocols: ["http", "https"] })
+    .withMessage("Avatar URL must be a valid http/https URL")
+    .isLength({ max: 500 }).withMessage("Avatar URL too long"),
+
+  body("preferences.genres")
+    .optional()
+    .isArray({ max: 5 }).withMessage("You can select at most 5 genres")
+    .bail()
+    .custom((genres) => {
+      const invalid = genres.filter((g) => !VALID_GENRES.includes(g));
+      if (invalid.length > 0) {
+        throw new Error(`Unsupported genre(s): ${invalid.join(", ")}`);
+      }
+      return true;
+    }),
+
+  body("preferences.explicitContent")
+    .optional()
+    .isBoolean().withMessage("explicitContent must be a boolean"),
+
+  body("preferences.autoplay")
+    .optional()
+    .isBoolean().withMessage("autoplay must be a boolean"),
+
+  body("preferences.language")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 10 }).withMessage("Language code must be 2-10 characters"),
+];
+
 module.exports = {
   validate,
   registerRules,
@@ -71,4 +117,5 @@ module.exports = {
   addSongRules,
   likeByUriRules,
   objectIdParam,
+  updateProfileRules,
 };

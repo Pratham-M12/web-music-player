@@ -2,6 +2,13 @@
    SONIX — Spotify API Configuration
    ──────────────────────────────────────────── */
 
+const SPOTIFY_REDIRECT_URI = (() => {
+  const origin = window.location.origin;
+  const path = window.location.pathname;
+  const isServedFromFrontendFolder = path.startsWith('/frontend/');
+  return `${origin}${isServedFromFrontendFolder ? '/frontend' : ''}/callback.html`;
+})();
+
 const SPOTIFY_CONFIG = {
   // ✅ Spotify Client ID (safe to expose in frontend — it's a public identifier)
   CLIENT_ID: 'c8d9585cebdc4077ad2b92de944c865b',
@@ -10,7 +17,7 @@ const SPOTIFY_CONFIG = {
   //    The frontend never needs it — token exchange happens server-side.
 
   // ✅ Redirect URI — must match exactly what's in your Spotify Dashboard
-  REDIRECT_URI: "http://127.0.0.1:5500/frontend/callback.html",
+  REDIRECT_URI: SPOTIFY_REDIRECT_URI,
 
   // Scopes: what permissions your app requests from Spotify
   SCOPES: [

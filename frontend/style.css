@@ -958,7 +958,7 @@ img {
 .artists-track {
   display: flex;
   gap: 24px;
-  padding: 0 52px;
+  padding: 0 0 0 52px;
   overflow-x: auto;
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
@@ -976,7 +976,7 @@ img {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   transition: transform .3s, border-color .3s
 }
@@ -987,9 +987,11 @@ img {
 }
 
 .artist-img-wrap {
-  position: relative;
-  aspect-ratio: 1;
-  overflow: hidden
+  width: 100%;
+  height: 250px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
 .artist-img {
@@ -1038,8 +1040,22 @@ img {
   opacity: 1
 }
 
-.artist-card:hover .artist-img {
+.artist-card:hover .artist-img img {
   transform: scale(1.05)
+}
+
+.artist-img {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.artist-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s;
 }
 
 .artist-play-btn {
@@ -1159,6 +1175,12 @@ img {
   overflow: hidden;
   position: relative;
   flex-shrink: 0
+}
+
+.track-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .track-cover-1 {
@@ -1303,6 +1325,12 @@ img {
   max-width: 360px;
   aspect-ratio: 1;
   border-radius: 4px
+}
+
+.album-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .album-art-1 {
@@ -4191,4 +4219,401 @@ img {
     padding: 28px 20px;
     margin: 16px;
   }
+}
+
+/* Profile / settings */
+.snx-profile-page {
+  padding-bottom: 60px
+}
+
+.snx-profile-hero {
+  position: relative;
+  padding: 80px 32px 34px;
+  min-height: 300px;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  overflow: hidden
+}
+
+.snx-profile-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--profile-img, linear-gradient(135deg, #151022, #301022)) center/cover no-repeat;
+  filter: blur(70px) brightness(.35);
+  transform: scale(1.35);
+  z-index: 0
+}
+
+.snx-profile-avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg3);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .55);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden
+}
+
+.snx-profile-avatar-empty {
+  background: linear-gradient(135deg, rgba(255, 107, 157, .95), rgba(255, 154, 60, .9))
+}
+
+.snx-profile-avatar span {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #080810
+}
+
+.snx-profile-avatar svg {
+  width: 62px;
+  height: 62px;
+  color: #080810
+}
+
+.snx-profile-hero-info {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 8px
+}
+
+.snx-profile-actions {
+  display: flex;
+  gap: 14px;
+  padding: 22px 32px
+}
+
+.snx-profile-form {
+  padding: 0 32px 32px
+}
+
+.snx-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px
+}
+
+.snx-profile-panel {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 6px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px
+}
+
+.snx-profile-panel-head h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 6px
+}
+
+.snx-profile-panel-head p,
+.snx-profile-hint {
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.5
+}
+
+.snx-input-group textarea,
+.snx-input-group select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: .9rem;
+  transition: all .2s;
+  outline: none
+}
+
+.snx-input-group textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.5
+}
+
+.snx-input-group select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat
+}
+
+.snx-input-group textarea:focus,
+.snx-input-group select:focus {
+  border-color: var(--accent);
+  background-color: rgba(139, 92, 246, .06);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .15)
+}
+
+.snx-input-group textarea::placeholder {
+  color: rgba(255, 255, 255, .2)
+}
+
+.snx-profile-count {
+  text-align: right;
+  color: var(--muted);
+  font-size: .72rem
+}
+
+.snx-genre-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px
+}
+
+.snx-genre-pill {
+  position: relative;
+  cursor: pointer
+}
+
+.snx-genre-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none
+}
+
+.snx-genre-pill span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .07);
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  transition: all .2s
+}
+
+.snx-genre-pill:hover span,
+.snx-genre-pill.active span {
+  background: var(--text);
+  color: var(--bg);
+  border-color: transparent
+}
+
+.snx-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  cursor: pointer
+}
+
+.snx-switch-row span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px
+}
+
+.snx-switch-row strong {
+  font-size: .9rem
+}
+
+.snx-switch-row small {
+  color: var(--muted);
+  font-size: .76rem
+}
+
+.snx-switch-row input {
+  appearance: none;
+  width: 48px;
+  height: 26px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .1);
+  position: relative;
+  flex-shrink: 0;
+  transition: all .2s
+}
+
+.snx-switch-row input::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .2s
+}
+
+.snx-switch-row input:checked {
+  background: linear-gradient(135deg, #ff6b9d, #ff9a3c);
+  border-color: transparent
+}
+
+.snx-switch-row input:checked::after {
+  transform: translateX(22px)
+}
+
+.snx-profile-footer {
+  margin-top: 18px;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px
+}
+
+.snx-profile-footer-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0
+}
+
+.snx-profile-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px
+}
+
+.snx-profile-stat-list div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, .07)
+}
+
+.snx-profile-stat-list span {
+  color: var(--muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em
+}
+
+.snx-profile-stat-list strong {
+  font-size: .9rem;
+  text-align: right
+}
+
+@media(max-width:900px) {
+  .snx-profile-grid {
+    grid-template-columns: 1fr
+  }
+
+  .snx-profile-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 72px 22px 28px
+  }
+
+  .snx-profile-avatar {
+    width: 132px;
+    height: 132px
+  }
+
+  .snx-profile-form,
+  .snx-profile-actions {
+    padding-left: 22px;
+    padding-right: 22px
+  }
+
+  .snx-profile-footer {
+    align-items: stretch;
+    flex-direction: column
+  }
+
+  .snx-profile-footer-actions {
+    flex-wrap: wrap
+  }
+}
+
+.artist-card {
+  position: relative;
+}
+
+/* Keep image perfectly circular */
+.artist-img-wrap {
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+/* NEW: play button outside */
+.artist-play-btn.outside {
+  position: absolute;
+  right: 14px;
+  bottom: 100px; /* adjust depending on your layout */
+  
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  
+  background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+  color: #fff;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+  
+  transition: transform 0.2s ease;
+  z-index: 10;
+}
+
+.artist-play-btn.outside:hover {
+  transform: scale(1.1);
+}
+
+.artist-play-btn.outside {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.artist-card:hover .artist-play-btn.outside {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.artist-card {
+  position: relative;
+}
+
+.artist-play-btn.outside {
+  position: absolute;
+  right: 14px;
+  bottom: 100px; /* tweak if needed */
+
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+
+  background: var(--accent);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.6);
+  z-index: 10;
 }

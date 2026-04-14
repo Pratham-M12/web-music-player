@@ -61,6 +61,7 @@ const historyRoutes = require("./routes/historyRoutes");
 const playlistRoutes = require("./routes/playlistRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const spotifyProxy = require("./routes/spotifyProxy");
+const profileRoutes = require("./routes/profileRoutes");
 
 app.use("/auth", authLimiter, authRoutes);
 app.use("/songs", songRoutes);
@@ -68,6 +69,7 @@ app.use("/history", historyRoutes);
 app.use("/playlists", playlistRoutes);
 app.use("/stats", statsRoutes);
 app.use("/spotify", spotifyProxy);
+app.use("/profile", profileRoutes);
 
 // ── Health check endpoint (no CORS restriction) ──
 app.get("/health", (req, res) => {

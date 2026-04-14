@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SONIX — Feel Every Beat</title>
-  <meta name="description" content="SONIX is the next-generation cinematic music streaming experience. Discover artists, albums, and sounds that move you." />
+  <meta name="description"
+    content="SONIX is the next-generation cinematic music streaming experience. Discover artists, albums, and sounds that move you." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
@@ -15,6 +19,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js" defer></script>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <!-- Custom Cursor -->
@@ -26,14 +31,15 @@
     <div class="nav-logo">
       <div class="logo-icon">
         <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="30" cy="30" r="28" stroke="url(#logoGrad)" stroke-width="2.5"/>
-          <path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round"/>
-          <line x1="10" y1="25" x2="50" y2="25" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.6"/>
-          <line x1="10" y1="37" x2="50" y2="37" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.6"/>
+          <circle cx="30" cy="30" r="28" stroke="url(#logoGrad)" stroke-width="2.5" />
+          <path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#logoGrad)"
+            stroke-width="3" stroke-linecap="round" />
+          <line x1="10" y1="25" x2="50" y2="25" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.6" />
+          <line x1="10" y1="37" x2="50" y2="37" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.6" />
           <defs>
             <linearGradient id="logoGrad" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ff6b9d"/>
-              <stop offset="100%" stop-color="#ff9a3c"/>
+              <stop offset="0%" stop-color="#ff6b9d" />
+              <stop offset="100%" stop-color="#ff9a3c" />
             </linearGradient>
           </defs>
         </svg>
@@ -53,9 +59,11 @@
       <button class="btn-primary" id="signupBtn" onclick="SonixAuth.open()">Get SONIX Free</button>
       <!-- Shown after login -->
       <div id="userMenu" style="display:none;align-items:center;gap:10px">
-        <img id="userAvatar" src="" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #ff6b9d">
+        <img id="userAvatar" src="" alt=""
+          style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #ff6b9d">
         <span id="userDisplayName" style="font-size:0.85rem;color:rgba(255,255,255,0.8)"></span>
-        <button class="btn-ghost" style="padding:6px 14px;font-size:0.8rem" onclick="SpotifyAPI.logout()">Sign Out</button>
+        <button class="btn-ghost" style="padding:6px 14px;font-size:0.8rem" onclick="SpotifyAPI.logout()">Sign
+          Out</button>
       </div>
     </div>
     <button class="nav-hamburger" id="hamburger" aria-label="Menu">
@@ -83,16 +91,11 @@
       <!-- Search input row -->
       <div class="search-input-wrap">
         <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <input
-          type="text"
-          id="searchInput"
-          class="search-input"
-          placeholder="Search songs, artists, albums…"
-          autocomplete="off"
-          spellcheck="false"
-        />
+        <input type="text" id="searchInput" class="search-input" placeholder="Search songs, artists, albums…"
+          autocomplete="off" spellcheck="false" />
         <button class="search-close-btn" id="searchCloseBtn" aria-label="Close search">✕</button>
       </div>
 
@@ -109,7 +112,8 @@
         <!-- Populated by JS -->
         <div class="search-empty" id="searchEmpty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <p>Search Spotify's entire library</p>
           <span>Songs · Artists · Albums</span>
@@ -127,7 +131,19 @@
       <!-- Logo -->
       <div class="snx-sidebar-logo">
         <div class="logo-icon" style="width:28px;height:28px">
-          <svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="28" stroke="url(#lg2)" stroke-width="2.5"/><path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/><line x1="10" y1="25" x2="50" y2="25" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6"/><line x1="10" y1="37" x2="50" y2="37" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6"/><defs><linearGradient id="lg2" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff9a3c"/></linearGradient></defs></svg>
+          <svg viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="30" r="28" stroke="url(#lg2)" stroke-width="2.5" />
+            <path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#lg2)" stroke-width="3"
+              stroke-linecap="round" />
+            <line x1="10" y1="25" x2="50" y2="25" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6" />
+            <line x1="10" y1="37" x2="50" y2="37" stroke="url(#lg2)" stroke-width="1.5" opacity="0.6" />
+            <defs>
+              <linearGradient id="lg2" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ff6b9d" />
+                <stop offset="100%" stop-color="#ff9a3c" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <span>SONIX</span>
       </div>
@@ -135,16 +151,30 @@
       <!-- Main nav -->
       <nav class="snx-sidebar-nav">
         <button class="snx-nav-item active" data-view="home">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
           <span>Home</span>
         </button>
         <button class="snx-nav-item" data-view="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
           <span>Search</span>
         </button>
         <button class="snx-nav-item" data-view="library">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          </svg>
           <span>Your Library</span>
+        </button>
+        <button class="snx-nav-item" data-view="profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>Profile</span>
         </button>
       </nav>
 
@@ -153,14 +183,20 @@
         <div class="snx-sidebar-lib-header">
           <span>Your Library</span>
           <button class="snx-sidebar-create" title="Create playlist" onclick="SonixPlaylist.openCreate()">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+            </svg>
           </button>
         </div>
         <div class="snx-sidebar-items" id="snxSidebarItems">
           <!-- Populated by JS after login -->
           <div class="snx-sidebar-liked">
             <div class="snx-liked-icon">
-              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <svg viewBox="0 0 24 24" fill="#fff" width="18" height="18">
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
             </div>
             <div class="snx-sidebar-item-info">
               <span class="snx-si-name">Liked Songs</span>
@@ -267,7 +303,7 @@
   <section class="section artists-section" id="artists">
     <div class="section-header">
       <span class="section-tag">FEATURED</span>
-      <h2 class="section-title reveal-text">The Artists<br/>Defining <span class="gradient-text">Right Now.</span></h2>
+      <h2 class="section-title reveal-text">The Artists<br />Defining <span class="gradient-text">Right Now.</span></h2>
       <p class="section-sub">Hand-picked. Genre-defining. Unmissable.</p>
     </div>
     <div class="artists-scroll-wrapper">
@@ -275,10 +311,14 @@
 
         <div class="artist-card" data-index="0">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-1"></div>
+            <div class="artist-img">
+              <img src="../assets/weeknd.jpg" alt="The Weeknd">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -292,10 +332,14 @@
 
         <div class="artist-card" data-index="1">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-2"></div>
+            <div class="artist-img">
+              <img src="../assets/taylor_swift.jpg" alt="Taylor Swift">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -309,10 +353,14 @@
 
         <div class="artist-card" data-index="2">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-3"></div>
+            <div class="artist-img">
+              <img src="../assets/drake.jpg" alt="Drake">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -326,10 +374,14 @@
 
         <div class="artist-card" data-index="3">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-4"></div>
+            <div class="artist-img">
+              <img src="../assets/billie_eilish.jpg" alt="Billie Eilish">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -343,10 +395,14 @@
 
         <div class="artist-card" data-index="4">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-5"></div>
+            <div class="artist-img">
+              <img src="../assets/bts.jpg" alt="BTS">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -360,10 +416,14 @@
 
         <div class="artist-card" data-index="5">
           <div class="artist-img-wrap">
-            <div class="artist-img artist-img-6"></div>
+            <div class="artist-img">
+              <img src="../assets/burna_boy.jpg" alt="Burna Boy">
+            </div>
             <div class="artist-overlay">
               <button class="artist-play-btn">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 4L20 12L7 20V4Z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -384,15 +444,19 @@
     <div class="trending-bg-text">SONIX</div>
     <div class="section-header">
       <span class="section-tag">HOT RIGHT NOW</span>
-      <h2 class="section-title reveal-text">Tracks<br/>Setting The <span class="gradient-text">World On Fire.</span></h2>
+      <h2 class="section-title reveal-text">Tracks<br />Setting The <span class="gradient-text">World On Fire.</span>
+      </h2>
     </div>
     <div class="tracks-list">
 
       <div class="track-item" data-track="0">
         <div class="track-num">01</div>
-        <div class="track-cover track-cover-1">
+        <div class="track-cover">
+          <img src="../assets/blinding_lights.jpg" alt="Blinding Lights">
           <div class="track-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z"/>
+            </svg>
           </div>
         </div>
         <div class="track-info">
@@ -406,15 +470,21 @@
         <div class="track-plays">2.3B plays</div>
         <div class="track-duration">3:22</div>
         <button class="track-like" data-liked="false">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
         </button>
       </div>
 
       <div class="track-item" data-track="1">
         <div class="track-num">02</div>
-        <div class="track-cover track-cover-2">
+        <div class="track-cover">
+          <img src="../assets/asitwas.jpg" alt="As It Was">
           <div class="track-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z"/>
+            </svg>
           </div>
         </div>
         <div class="track-info">
@@ -428,15 +498,21 @@
         <div class="track-plays">1.9B plays</div>
         <div class="track-duration">2:37</div>
         <button class="track-like" data-liked="false">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
         </button>
       </div>
 
       <div class="track-item" data-track="2">
         <div class="track-num">03</div>
-        <div class="track-cover track-cover-3">
+        <div class="track-cover">
+          <img src="../assets/flowers.jpg" alt="Flowers">
           <div class="track-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z"/>
+            </svg>
           </div>
         </div>
         <div class="track-info">
@@ -450,15 +526,21 @@
         <div class="track-plays">1.4B plays</div>
         <div class="track-duration">3:20</div>
         <button class="track-like" data-liked="false">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
         </button>
       </div>
 
       <div class="track-item" data-track="3">
         <div class="track-num">04</div>
-        <div class="track-cover track-cover-4">
+        <div class="track-cover">
+          <img src="../assets/espresso.jpg" alt="Espresso">
           <div class="track-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z"/>
+            </svg>
           </div>
         </div>
         <div class="track-info">
@@ -472,15 +554,21 @@
         <div class="track-plays">1.1B plays</div>
         <div class="track-duration">2:55</div>
         <button class="track-like" data-liked="false">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
         </button>
       </div>
 
       <div class="track-item" data-track="4">
         <div class="track-num">05</div>
-        <div class="track-cover track-cover-5">
+        <div class="track-cover">
+          <img src="../assets/diewithasmile.jpg" alt="Die With A Smile">
           <div class="track-play-overlay">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z"/>
+            </svg>
           </div>
         </div>
         <div class="track-info">
@@ -494,7 +582,10 @@
         <div class="track-plays">980M plays</div>
         <div class="track-duration">4:11</div>
         <button class="track-like" data-liked="false">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
         </button>
       </div>
 
@@ -505,25 +596,32 @@
   <section class="section albums-section" id="albums">
     <div class="section-header">
       <span class="section-tag">NEW RELEASES</span>
-      <h2 class="section-title reveal-text">Albums That<br/><span class="gradient-text">Changed Everything.</span></h2>
+      <h2 class="section-title reveal-text">Albums That<br /><span class="gradient-text">Changed Everything.</span></h2>
     </div>
 
     <div class="album-panel album-panel-left">
       <div class="album-panel-visual">
-        <div class="album-art album-art-1"></div>
+        <div class="album-art">
+          <img src="../assets/midnights.jpg" alt="Midnights">
+        </div>
         <div class="album-art-glow"></div>
         <div class="album-tracks-preview">
-          <div class="atp-item"><span class="atp-num">1</span><span class="atp-name">Midnight Rain</span><span class="atp-dur">3:01</span></div>
-          <div class="atp-item"><span class="atp-num">2</span><span class="atp-name">Bejeweled</span><span class="atp-dur">3:14</span></div>
-          <div class="atp-item playing"><span class="atp-num">3</span><span class="atp-name">Lavender Haze</span><span class="atp-dur">3:22</span></div>
-          <div class="atp-item"><span class="atp-num">4</span><span class="atp-name">Marjorie</span><span class="atp-dur">4:17</span></div>
+          <div class="atp-item"><span class="atp-num">1</span><span class="atp-name">Midnight Rain</span><span
+              class="atp-dur">3:01</span></div>
+          <div class="atp-item"><span class="atp-num">2</span><span class="atp-name">Bejeweled</span><span
+              class="atp-dur">3:14</span></div>
+          <div class="atp-item playing"><span class="atp-num">3</span><span class="atp-name">Lavender Haze</span><span
+              class="atp-dur">3:22</span></div>
+          <div class="atp-item"><span class="atp-num">4</span><span class="atp-name">Marjorie</span><span
+              class="atp-dur">4:17</span></div>
         </div>
       </div>
       <div class="album-panel-info">
         <span class="album-tag">ALBUM OF THE YEAR</span>
         <h2 class="album-panel-title">Midnights</h2>
         <p class="album-panel-artist">Taylor Swift</p>
-        <p class="album-panel-desc">A collection of music written in the middle of the night, a journey through terrors and sweet dreams. The floors we pace and the demons we face.</p>
+        <p class="album-panel-desc">A collection of music written in the middle of the night, a journey through terrors
+          and sweet dreams. The floors we pace and the demons we face.</p>
         <div class="album-panel-meta">
           <span>13 Tracks</span>
           <span>—</span>
@@ -533,7 +631,9 @@
         </div>
         <div class="album-panel-actions">
           <button class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z" />
+            </svg>
             Play Album
           </button>
           <button class="btn-ghost">Add to Library</button>
@@ -546,7 +646,8 @@
         <span class="album-tag">CRITICS' CHOICE</span>
         <h2 class="album-panel-title">After Hours</h2>
         <p class="album-panel-artist">The Weeknd</p>
-        <p class="album-panel-desc">An exploration of decadence and depravity through the eyes of a character lost in the dark thrills of Los Angeles. A defining record of a generation.</p>
+        <p class="album-panel-desc">An exploration of decadence and depravity through the eyes of a character lost in
+          the dark thrills of Los Angeles. A defining record of a generation.</p>
         <div class="album-panel-meta">
           <span>14 Tracks</span>
           <span>—</span>
@@ -556,20 +657,28 @@
         </div>
         <div class="album-panel-actions">
           <button class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 4L20 12L7 20V4Z" />
+            </svg>
             Play Album
           </button>
           <button class="btn-ghost">Add to Library</button>
         </div>
       </div>
       <div class="album-panel-visual">
-        <div class="album-art album-art-2"></div>
+        <div class="album-art">
+          <img src="../assets/after_hours.jpg" alt="After Hours">
+        </div>
         <div class="album-art-glow album-art-glow-2"></div>
         <div class="album-tracks-preview">
-          <div class="atp-item"><span class="atp-num">1</span><span class="atp-name">Alone Again</span><span class="atp-dur">4:10</span></div>
-          <div class="atp-item playing"><span class="atp-num">2</span><span class="atp-name">Blinding Lights</span><span class="atp-dur">3:22</span></div>
-          <div class="atp-item"><span class="atp-num">3</span><span class="atp-name">In Your Eyes</span><span class="atp-dur">3:58</span></div>
-          <div class="atp-item"><span class="atp-num">4</span><span class="atp-name">Save Your Tears</span><span class="atp-dur">3:36</span></div>
+          <div class="atp-item"><span class="atp-num">1</span><span class="atp-name">Alone Again</span><span
+              class="atp-dur">4:10</span></div>
+          <div class="atp-item playing"><span class="atp-num">2</span><span class="atp-name">Blinding Lights</span><span
+              class="atp-dur">3:22</span></div>
+          <div class="atp-item"><span class="atp-num">3</span><span class="atp-name">In Your Eyes</span><span
+              class="atp-dur">3:58</span></div>
+          <div class="atp-item"><span class="atp-num">4</span><span class="atp-name">Save Your Tears</span><span
+              class="atp-dur">3:36</span></div>
         </div>
       </div>
     </div>
@@ -580,7 +689,7 @@
   <section class="section genres-section" id="genres">
     <div class="section-header">
       <span class="section-tag">EXPLORE</span>
-      <h2 class="section-title reveal-text">Find Your<br/><span class="gradient-text">Sound.</span></h2>
+      <h2 class="section-title reveal-text">Find Your<br /><span class="gradient-text">Sound.</span></h2>
     </div>
     <div class="genres-grid">
       <div class="genre-card genre-card-hiphop">
@@ -639,7 +748,7 @@
     <div class="events-bg-orb"></div>
     <div class="section-header">
       <span class="section-tag">LIVE EVENTS</span>
-      <h2 class="section-title reveal-text">Don't Miss<br/>A <span class="gradient-text">Moment.</span></h2>
+      <h2 class="section-title reveal-text">Don't Miss<br />A <span class="gradient-text">Moment.</span></h2>
     </div>
     <div class="events-grid">
       <div class="event-card">
@@ -672,7 +781,8 @@
         <div class="event-info">
           <h3 class="event-title">Billie Eilish — Hit Me Hard And Soft</h3>
           <p class="event-venue">Crypto.com Arena, Los Angeles</p>
-          <div class="event-tags"><span class="event-tag-item">Alt Pop</span><span class="event-tag-item">Dark Pop</span></div>
+          <div class="event-tags"><span class="event-tag-item">Alt Pop</span><span class="event-tag-item">Dark
+              Pop</span></div>
         </div>
         <div class="event-action">
           <span class="event-seats">7 seats left</span>
@@ -684,7 +794,8 @@
         <div class="event-info">
           <h3 class="event-title">Burna Boy — I Told Them Tour</h3>
           <p class="event-venue">O2 Arena, London</p>
-          <div class="event-tags"><span class="event-tag-item">Afrobeats</span><span class="event-tag-item">Dancehall</span></div>
+          <div class="event-tags"><span class="event-tag-item">Afrobeats</span><span
+              class="event-tag-item">Dancehall</span></div>
         </div>
         <div class="event-action">
           <span class="event-seats">204 seats left</span>
@@ -700,7 +811,7 @@
     <div class="cta-bg-orb cta-orb-2"></div>
     <div class="cta-content">
       <span class="section-tag">PLANS & PRICING</span>
-      <h2 class="cta-title">Premium Plans.<br/><span class="gradient-text">In Rupees.</span></h2>
+      <h2 class="cta-title">Premium Plans.<br /><span class="gradient-text">In Rupees.</span></h2>
       <p class="cta-sub">All plans include a 1-month free trial. Cancel anytime.</p>
       <div class="cta-plans" style="grid-template-columns:repeat(5,1fr);max-width:1100px;">
 
@@ -709,9 +820,18 @@
           <h3>Mini</h3>
           <p class="plan-price">₹7<span>/day</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Ad-free music</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 mobile device</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 30 song offline</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Ad-free music</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 1 mobile device</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 30 song offline</li>
           </ul>
           <button class="btn-ghost plan-btn">Try Free</button>
         </div>
@@ -722,10 +842,22 @@
           <h3>Individual</h3>
           <p class="plan-price">₹59<span>/mo</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Ad-free forever</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Offline downloads</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> HiFi audio</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 account</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Ad-free forever</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Offline downloads</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> HiFi audio</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 1 account</li>
           </ul>
           <button class="btn-primary plan-btn">Start Free Trial</button>
         </div>
@@ -735,9 +867,18 @@
           <h3>Student</h3>
           <p class="plan-price">₹29<span>/mo</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All Individual perks</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Verified students</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 1 account</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> All Individual perks</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Verified students</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 1 account</li>
           </ul>
           <button class="btn-ghost plan-btn">Get Student</button>
         </div>
@@ -747,9 +888,18 @@
           <h3>Duo</h3>
           <p class="plan-price">₹149<span>/mo</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 2 accounts</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Same address</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All premium perks</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 2 accounts</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Same address</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> All premium perks</li>
           </ul>
           <button class="btn-ghost plan-btn">Try Duo</button>
         </div>
@@ -759,9 +909,18 @@
           <h3>Family</h3>
           <p class="plan-price">₹179<span>/mo</span></p>
           <ul class="plan-features">
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> 6 accounts</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> Kids safe mode</li>
-            <li><svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z"/></svg> All premium perks</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> 6 accounts</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> Kids safe mode</li>
+            <li><svg viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.707 4.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L6 10.586l6.293-6.293a1 1 0 011.414 0z" />
+              </svg> All premium perks</li>
           </ul>
           <button class="btn-ghost plan-btn">Try Family</button>
         </div>
@@ -778,14 +937,15 @@
         <div class="nav-logo">
           <div class="logo-icon logo-icon-sm">
             <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="30" cy="30" r="28" stroke="url(#logoGrad2)" stroke-width="2.5"/>
-              <path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#logoGrad2)" stroke-width="3" stroke-linecap="round"/>
-              <line x1="10" y1="25" x2="50" y2="25" stroke="url(#logoGrad2)" stroke-width="1.5" opacity="0.6"/>
-              <line x1="10" y1="37" x2="50" y2="37" stroke="url(#logoGrad2)" stroke-width="1.5" opacity="0.6"/>
+              <circle cx="30" cy="30" r="28" stroke="url(#logoGrad2)" stroke-width="2.5" />
+              <path d="M38 16C38 16 22 20 22 28C22 34 34 33 34 39C34 45 18 48 18 48" stroke="url(#logoGrad2)"
+                stroke-width="3" stroke-linecap="round" />
+              <line x1="10" y1="25" x2="50" y2="25" stroke="url(#logoGrad2)" stroke-width="1.5" opacity="0.6" />
+              <line x1="10" y1="37" x2="50" y2="37" stroke="url(#logoGrad2)" stroke-width="1.5" opacity="0.6" />
               <defs>
                 <linearGradient id="logoGrad2" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#ff6b9d"/>
-                  <stop offset="100%" stop-color="#ff9a3c"/>
+                  <stop offset="0%" stop-color="#ff6b9d" />
+                  <stop offset="100%" stop-color="#ff9a3c" />
                 </linearGradient>
               </defs>
             </svg>
@@ -795,13 +955,22 @@
         <p class="footer-tagline">Feel Every Beat.</p>
         <div class="footer-social">
           <a href="#" class="social-link" aria-label="Twitter">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.258 5.63 5.907-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.258 5.63 5.907-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
           </a>
           <a href="#" class="social-link" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+            </svg>
           </a>
           <a href="#" class="social-link" aria-label="TikTok">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z" />
+            </svg>
           </a>
         </div>
       </div>
@@ -859,26 +1028,41 @@
         <div class="player-track-artist" id="playerTrackArtist">The Weeknd</div>
       </div>
       <button class="player-like-btn" id="playerLikeBtn" aria-label="Like track">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
       </button>
     </div>
     <div class="player-controls">
       <div class="player-buttons">
         <button class="player-btn" id="shuffleBtn" title="Shuffle" aria-label="Shuffle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 3h5v5M4 20L21 3M16 21h5v-5M4 4l5 5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M16 3h5v5M4 20L21 3M16 21h5v-5M4 4l5 5" />
+          </svg>
         </button>
         <button class="player-btn" id="prevBtn" title="Previous" aria-label="Previous">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+          </svg>
         </button>
         <button class="player-btn player-btn-main" id="playBtn" aria-label="Play/Pause">
-          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
         </button>
         <button class="player-btn" id="nextBtn" title="Next" aria-label="Next">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+          </svg>
         </button>
         <button class="player-btn" id="repeatBtn" title="Repeat" aria-label="Repeat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
+          </svg>
         </button>
       </div>
       <div class="player-progress-area">
@@ -892,86 +1076,97 @@
     </div>
     <div class="player-volume-area">
       <button class="player-btn player-btn-sm" id="volumeBtn" aria-label="Volume">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 9v6h4l5 5V4L7 9H3z" />
+          <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+        </svg>
       </button>
       <div class="player-volume-bar" id="volumeBar">
         <div class="player-volume-fill" id="volumeFill"></div>
         <div class="player-volume-thumb" id="volumeThumb"></div>
       </div>
       <button class="player-btn player-btn-sm" id="queueBtn" aria-label="Queue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="8" y1="6" x2="21" y2="6" />
+          <line x1="8" y1="12" x2="21" y2="12" />
+          <line x1="8" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="3.01" y2="6" />
+          <line x1="3" y1="12" x2="3.01" y2="12" />
+          <line x1="3" y1="18" x2="3.01" y2="18" />
+        </svg>
       </button>
     </div>
   </div>
 
-  <script src="config.js"></script>
-  <script src="spotify.js"></script>
-  <script src="router.js"></script>
-  <script src="features.js"></script>
-  <script src="app.js"></script>
+  <script src="/frontend/config.js"></script>
+  <script src="/frontend/spotify.js"></script>
+  <script src="/frontend/features.js"></script>
+  <script src="/frontend/router.js"></script>
+  <script src="/frontend/app.js"></script>
 
   <!-- ═══ BROADWAY PARTICLE SYSTEM + NOTE PARALLAX ═══ -->
   <script>
-  (function(){
-    const canvas = document.getElementById('particleCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W, H, particles = [];
+    (function () {
+      const canvas = document.getElementById('particleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
 
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
 
-    // Particle class
-    function Particle() { this.reset(); }
-    Particle.prototype.reset = function() {
-      // Concentrate particles around the right side (note area)
-      this.x  = W * 0.5 + Math.random() * W * 0.55;
-      this.y  = Math.random() * H;
-      this.r  = Math.random() * 2.5 + 0.5;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = -(Math.random() * 0.8 + 0.2);
-      this.life = Math.random();
-      this.maxLife = Math.random() * 0.012 + 0.004;
-      // Alternate between gold and purple
-      const isGold = Math.random() > 0.45;
-      this.color = isGold
-        ? `hsla(${38 + Math.random()*12},95%,${65+Math.random()*20}%,`
-        : `hsla(${260 + Math.random()*20},85%,${68+Math.random()*18}%,`;
-    };
-    Particle.prototype.update = function() {
-      this.x  += this.vx;
-      this.y  += this.vy;
-      this.life -= this.maxLife;
-      if (this.life <= 0) this.reset();
-    };
-    Particle.prototype.draw = function() {
-      const alpha = Math.max(0, this.life);
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = this.color + alpha + ')';
-      ctx.fill();
-    };
+      // Particle class
+      function Particle() { this.reset(); }
+      Particle.prototype.reset = function () {
+        // Concentrate particles around the right side (note area)
+        this.x = W * 0.5 + Math.random() * W * 0.55;
+        this.y = Math.random() * H;
+        this.r = Math.random() * 2.5 + 0.5;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = -(Math.random() * 0.8 + 0.2);
+        this.life = Math.random();
+        this.maxLife = Math.random() * 0.012 + 0.004;
+        // Alternate between gold and purple
+        const isGold = Math.random() > 0.45;
+        this.color = isGold
+          ? `hsla(${38 + Math.random() * 12},95%,${65 + Math.random() * 20}%,`
+          : `hsla(${260 + Math.random() * 20},85%,${68 + Math.random() * 18}%,`;
+      };
+      Particle.prototype.update = function () {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= this.maxLife;
+        if (this.life <= 0) this.reset();
+      };
+      Particle.prototype.draw = function () {
+        const alpha = Math.max(0, this.life);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = this.color + alpha + ')';
+        ctx.fill();
+      };
 
-    // Init particles
-    for (let i = 0; i < 120; i++) {
-      const p = new Particle();
-      p.life = Math.random(); // stagger starting life
-      particles.push(p);
-    }
+      // Init particles
+      for (let i = 0; i < 120; i++) {
+        const p = new Particle();
+        p.life = Math.random(); // stagger starting life
+        particles.push(p);
+      }
 
-    function loop() {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => { p.update(); p.draw(); });
-      requestAnimationFrame(loop);
-    }
-    loop();
+      function loop() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(loop);
+      }
+      loop();
 
-    // Mouse parallax handled by GSAP in app.js
-  })();
+      // Mouse parallax handled by GSAP in app.js
+    })();
   </script>
 </body>
+
 </html>

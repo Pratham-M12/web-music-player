@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────
    SONIX App Router
-   Handles: home | search | artist/:id | album/:id | library
+   Handles: home | search | artist/:id | album/:id | library | profile
    ──────────────────────────────────────────── */
 'use strict';
 
@@ -25,6 +25,7 @@ const SonixRouter = (() => {
       case 'artist':  renderArtist(id);     break;
       case 'album':   renderAlbum(id);      break;
       case 'liked':   renderLikedSongs();   break;
+      case 'profile': renderProfile();      break;
       default:        renderHome();
     }
     if (_mainEl) _mainEl.scrollTop = 0;
@@ -58,6 +59,47 @@ const SonixRouter = (() => {
     return `<div class="snx-loading"><div class="snx-spinner"></div></div>`;
   }
 
+  function _extractBgUrl(el) {
+    const style = el?.getAttribute('style') || '';
+    const match = style.match(/url\(["']?([^"')]+)["']?\)/);
+    return match?.[1] || '';
+  }
+
+  function _rememberRecent(track) {
+    if (!track?.uri || !track.uri.includes(':track:')) return;
+    if (typeof addToRecent !== 'function') return;
+
+    addToRecent({
+      uri: track.uri,
+      name: track.name || 'Unknown Track',
+      artist: track.artist || 'Unknown Artist',
+      coverImage: track.coverImage || '',
+    });
+  }
+
+  function _rememberRecentFromElement(el) {
+    if (!el?.dataset?.uri || !el.dataset.uri.includes(':track:')) return;
+
+    const name =
+      el.dataset.trackName ||
+      el.querySelector('.snx-card-name, .snx-trow-name, .snx-tl-name, .snx-top-name')?.textContent ||
+      'Unknown Track';
+
+    const artist =
+      el.dataset.trackArtist ||
+      el.querySelector('.snx-card-sub, .snx-trow-sub, .snx-tl-sub, .snx-top-sub')?.textContent ||
+      'Unknown Artist';
+
+    const artEl = el.querySelector('.snx-card-img, .snx-trow-art, .snx-tl-art, .snx-top-img, .snx-quick-img');
+
+    _rememberRecent({
+      uri: el.dataset.uri,
+      name: name.trim(),
+      artist: artist.trim(),
+      coverImage: el.dataset.trackCover || _extractBgUrl(artEl),
+    });
+  }
+
   // ─── HOME VIEW ──────────────────────────────────────────────────────────
   async function renderHome() {
     _mainEl.innerHTML = _loading();
@@ -77,7 +119,7 @@ const SonixRouter = (() => {
     const quickItems = [
       ...(topTracksData?.items || []).slice(0, 3).map(t => ({
         img: t.album?.images?.[0]?.url, name: t.name, uri: t.uri,
-        type: 'track', id: t.id
+        artist: t.artists?.map(a => a.name).join(', '), type: 'track', id: t.id
       })),
       ...(topArtistsData?.items || []).slice(0, 3).map(a => ({
         img: a.images?.[0]?.url, name: a.name, uri: a.uri,
@@ -94,7 +136,7 @@ const SonixRouter = (() => {
         <!-- Quick picks grid -->
         <div class="snx-quick-grid">
           ${quickItems.map(item => `
-            <div class="snx-quick-card" data-type="${escapeHTML(item.type)}" data-id="${escapeHTML(item.id)}" data-uri="${escapeHTML(item.uri)}">
+            <div class="snx-quick-card" data-type="${escapeHTML(item.type)}" data-id="${escapeHTML(item.id)}" data-uri="${escapeHTML(item.uri)}" data-track-name="${escapeHTML(item.name || '')}" data-track-artist="${escapeHTML(item.artist || '')}" data-track-cover="${escapeHTML(item.img || '')}">
               <div class="snx-quick-img" style="${_img(item.img)}"></div>
               <span>${escapeHTML(item.name)}</span>
               <button class="snx-quick-play">${_playIcon()}</button>
@@ -117,7 +159,7 @@ const SonixRouter = (() => {
           </div>
           <div class="snx-cards-scroll">
             ${tracks.map(t => `
-              <div class="snx-card" data-uri="${escapeHTML(t.uri)}" data-type="track">
+              <div class="snx-card" data-uri="${escapeHTML(t.uri)}" data-type="track" data-track-name="${escapeHTML(t.name)}" data-track-artist="${escapeHTML(t.artists?.map(a => a.name).join(', '))}" data-track-cover="${escapeHTML(t.album?.images?.[1]?.url || t.album?.images?.[0]?.url || '')}">
                 <div class="snx-card-img" style="${_img(t.album?.images?.[1]?.url || t.album?.images?.[0]?.url)}">
                   <button class="snx-card-play">${_playIcon()}</button>
                 </div>
@@ -190,6 +232,7 @@ const SonixRouter = (() => {
     html += `</div>`;
     _mainEl.innerHTML = html;
     _bindCards();
+    if (typeof renderRecentSongs === 'function') renderRecentSongs();
   }
 
   // ─── SEARCH VIEW ────────────────────────────────────────────────────────
@@ -269,7 +312,7 @@ const SonixRouter = (() => {
         <div class="snx-search-top">
           <div class="snx-search-top-left">
             <h2>Top result</h2>
-            <div class="snx-top-card" data-type="${isArtist ? 'artist' : 'track'}" data-id="${top.id}" data-uri="${top.uri || ''}">
+            <div class="snx-top-card" data-type="${isArtist ? 'artist' : 'track'}" data-id="${top.id}" data-uri="${top.uri || ''}" data-track-name="${!isArtist ? escapeHTML(top.name) : ''}" data-track-artist="${!isArtist ? escapeHTML(top.artists?.map(a => a.name).join(', ')) : ''}" data-track-cover="${!isArtist ? escapeHTML(img || '') : ''}">
               <div class="snx-top-img ${isArtist ? 'snx-top-img-circle' : ''}" style="${_img(img)}"></div>
               <div class="snx-top-name">${top.name}</div>
               <div class="snx-top-sub">${isArtist ? 'Artist' : top.artists?.map(a => a.name).join(', ')}</div>
@@ -280,7 +323,7 @@ const SonixRouter = (() => {
             <h2>Songs</h2>
             <div class="snx-track-list">
               ${tracks.slice(0, 4).map(t => `
-                <div class="snx-track-row" data-uri="${escapeHTML(t.uri)}">
+                <div class="snx-track-row" data-uri="${escapeHTML(t.uri)}" data-track-name="${escapeHTML(t.name)}" data-track-artist="${escapeHTML(t.artists?.map(a => a.name).join(', '))}" data-track-cover="${escapeHTML(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '')}">
                   <div class="snx-trow-art" style="${_img(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url)}">
                     <div class="snx-trow-overlay">${_playIcon()}</div>
                   </div>
@@ -378,7 +421,7 @@ const SonixRouter = (() => {
           <h2>Popular</h2>
           <div class="snx-tracklist">
             ${tracks.slice(0, 10).map((t, i) => `
-              <div class="snx-tl-row" data-uri="${escapeHTML(t.uri)}">
+              <div class="snx-tl-row" data-uri="${escapeHTML(t.uri)}" data-track-name="${escapeHTML(t.name)}" data-track-artist="${escapeHTML(artist.name)}" data-track-cover="${escapeHTML(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url || '')}">
                 <div class="snx-tl-num">${i + 1}</div>
                 <div class="snx-tl-art" style="${_img(t.album?.images?.[2]?.url || t.album?.images?.[0]?.url)}">
                   <div class="snx-tl-overlay">${_playIcon()}</div>
@@ -432,7 +475,15 @@ const SonixRouter = (() => {
 
     // Hero play button
     document.getElementById('artistPlayBtn')?.addEventListener('click', () => {
-      if (tracks[0]) SpotifyAPI.playTrack(tracks[0].uri);
+      if (tracks[0]) {
+        _rememberRecent({
+          uri: tracks[0].uri,
+          name: tracks[0].name,
+          artist: artist.name,
+          coverImage: tracks[0].album?.images?.[0]?.url || '',
+        });
+        SpotifyAPI.playTrack(tracks[0].uri);
+      }
     });
   }
 
@@ -478,7 +529,7 @@ const SonixRouter = (() => {
             <span class="snx-tl-dur-head">⏱</span>
           </div>
           ${tracks.map((t, i) => `
-            <div class="snx-tl-row" data-uri="${t.uri}">
+            <div class="snx-tl-row" data-uri="${escapeHTML(t.uri)}" data-track-name="${escapeHTML(t.name)}" data-track-artist="${escapeHTML(t.artists?.map(a => a.name).join(', '))}" data-track-cover="${escapeHTML(img)}">
               <div class="snx-tl-num">${i + 1}</div>
               <div class="snx-tl-info">
                 <div class="snx-tl-name">${escapeHTML(t.name)}</div>
@@ -606,7 +657,322 @@ const SonixRouter = (() => {
     });
   }
 
-  // ─── CARD BINDING ────────────────────────────────────────────────────────
+  // PROFILE / SETTINGS VIEW
+  async function renderProfile() {
+    _mainEl.innerHTML = _loading();
+
+    const token = localStorage.getItem('token');
+    const spotifyUser = SpotifyAPI.isLoggedIn() ? await SpotifyAPI.getCurrentUser() : null;
+
+    if (!token && spotifyUser) {
+      const displayName = spotifyUser.display_name || 'Spotify Listener';
+      const avatarUrl = spotifyUser.images?.[0]?.url || '';
+      const initials = displayName.trim().slice(0, 1).toUpperCase();
+      const followers = spotifyUser.followers?.total;
+      const followersText = Number.isFinite(followers) ? `${_fmtFollowers(followers)} followers` : 'Spotify connected';
+
+      _mainEl.innerHTML = `
+        <div class="snx-profile-page">
+          <div class="snx-profile-hero">
+            <div class="snx-profile-hero-bg" style="${avatarUrl ? `--profile-img:url(${escapeHTML(avatarUrl)})` : ''}"></div>
+            <div class="snx-profile-avatar ${avatarUrl ? '' : 'snx-profile-avatar-empty'}" style="${avatarUrl ? `background:url(${escapeHTML(avatarUrl)}) center/cover` : ''}">
+              ${avatarUrl ? '' : `<span>${escapeHTML(initials)}</span>`}
+            </div>
+            <div class="snx-profile-hero-info">
+              <span class="snx-verified">SPOTIFY CONNECTED</span>
+              <h1 class="snx-artist-name">${escapeHTML(displayName)}</h1>
+              <p class="snx-artist-followers">${escapeHTML(spotifyUser.email || followersText)}</p>
+            </div>
+          </div>
+
+          <div class="snx-profile-form">
+            <div class="snx-profile-grid">
+              <section class="snx-profile-panel">
+                <div class="snx-profile-panel-head">
+                  <h2>Spotify Account</h2>
+                  <p>Your Spotify login is active. Playback, search, library, artists, and albums can use this account.</p>
+                </div>
+                <div class="snx-profile-stat-list">
+                  <div><span>Country</span><strong>${escapeHTML(spotifyUser.country || 'Not shared')}</strong></div>
+                  <div><span>Product</span><strong>${escapeHTML(spotifyUser.product || 'Not shared')}</strong></div>
+                  <div><span>Profile</span><strong>${escapeHTML(spotifyUser.type || 'User')}</strong></div>
+                </div>
+              </section>
+
+              <section class="snx-profile-panel">
+                <div class="snx-profile-panel-head">
+                  <h2>SONIX Preferences</h2>
+                  <p>Create or sign in to a SONIX account to save bio, avatar, favorite genres, autoplay, explicit-content settings, liked songs, and playlists.</p>
+                </div>
+                <button class="snx-play-big" id="profileSigninBtn" type="button">Sign in to SONIX</button>
+              </section>
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('profileSigninBtn')?.addEventListener('click', () => SonixAuth.open());
+      return;
+    }
+
+    if (!token) {
+      _mainEl.innerHTML = `
+        <div class="snx-profile-page">
+          <div class="snx-profile-hero">
+            <div class="snx-profile-hero-bg"></div>
+            <div class="snx-profile-avatar snx-profile-avatar-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="snx-profile-hero-info">
+              <span class="snx-verified">SONIX PROFILE</span>
+              <h1 class="snx-artist-name">Make it yours.</h1>
+              <p class="snx-artist-followers">Sign in to save your profile, preferences, playlists, liked songs, and listening history.</p>
+            </div>
+          </div>
+          <div class="snx-profile-actions">
+            <button class="snx-play-big" id="profileSigninBtn">Sign in to SONIX</button>
+            <button class="snx-follow-btn" id="profileSpotifyBtn">Continue with Spotify</button>
+          </div>
+        </div>`;
+
+      document.getElementById('profileSigninBtn')?.addEventListener('click', () => SonixAuth.open());
+      document.getElementById('profileSpotifyBtn')?.addEventListener('click', () => SpotifyAPI.login());
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/profile/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || 'Could not load profile');
+
+      const profile = payload.data || {};
+      const preferences = profile.preferences || {};
+      const selectedGenres = Array.isArray(preferences.genres) ? preferences.genres : [];
+      const displayName = profile.displayName || profile.username || spotifyUser?.display_name || 'Listener';
+      const avatarUrl = profile.avatarUrl || spotifyUser?.images?.[0]?.url || '';
+      const initials = (displayName || 'S').trim().slice(0, 1).toUpperCase();
+      const validGenres = [
+        'pop', 'rock', 'hip-hop', 'electronic', 'jazz',
+        'classical', 'r&b', 'metal', 'indie', 'folk',
+        'latin', 'country', 'blues', 'reggae', 'soul',
+      ];
+
+      _mainEl.innerHTML = `
+        <div class="snx-profile-page">
+          <div class="snx-profile-hero">
+            <div class="snx-profile-hero-bg" style="${avatarUrl ? `--profile-img:url(${escapeHTML(avatarUrl)})` : ''}"></div>
+            <div class="snx-profile-avatar ${avatarUrl ? '' : 'snx-profile-avatar-empty'}" id="profileAvatarPreview" style="${avatarUrl ? `background:url(${escapeHTML(avatarUrl)}) center/cover` : ''}">
+              ${avatarUrl ? '' : `<span>${escapeHTML(initials)}</span>`}
+            </div>
+            <div class="snx-profile-hero-info">
+              <span class="snx-verified">SONIX PROFILE</span>
+              <h1 class="snx-artist-name" id="profileHeroName">${escapeHTML(displayName)}</h1>
+              <p class="snx-artist-followers">${escapeHTML(profile.email || '')}${spotifyUser?.display_name ? ` &middot; Spotify: ${escapeHTML(spotifyUser.display_name)}` : ''}</p>
+            </div>
+          </div>
+
+          <form class="snx-profile-form" id="profileForm">
+            <div class="snx-profile-grid">
+              <section class="snx-profile-panel">
+                <div class="snx-profile-panel-head">
+                  <h2>Public Profile</h2>
+                  <p>Your name, avatar, and short note across SONIX.</p>
+                </div>
+
+                <div class="snx-input-group">
+                  <label for="profileDisplayName">Display Name</label>
+                  <input type="text" id="profileDisplayName" maxlength="40" value="${escapeHTML(profile.displayName || '')}" placeholder="${escapeHTML(profile.username || 'Your name')}" />
+                </div>
+
+                <div class="snx-input-group">
+                  <label for="profileBio">Bio</label>
+                  <textarea id="profileBio" maxlength="200" placeholder="A line about your sound.">${escapeHTML(profile.bio || '')}</textarea>
+                  <div class="snx-profile-count"><span id="profileBioCount">${String((profile.bio || '').length)}</span>/200</div>
+                </div>
+
+                <div class="snx-input-group">
+                  <label for="profileAvatarUrl">Avatar URL</label>
+                  <input type="url" id="profileAvatarUrl" value="${escapeHTML(profile.avatarUrl || '')}" placeholder="https://example.com/avatar.jpg" />
+                </div>
+              </section>
+
+              <section class="snx-profile-panel">
+                <div class="snx-profile-panel-head">
+                  <h2>Listening</h2>
+                  <p>Tune recommendations and playback behavior.</p>
+                </div>
+
+                <div class="snx-input-group">
+                  <label>Favorite Genres</label>
+                  <div class="snx-genre-pills" id="profileGenrePills">
+                    ${validGenres.map(genre => `
+                      <label class="snx-genre-pill ${selectedGenres.includes(genre) ? 'active' : ''}">
+                        <input type="checkbox" value="${escapeHTML(genre)}" ${selectedGenres.includes(genre) ? 'checked' : ''} />
+                        <span>${escapeHTML(genre)}</span>
+                      </label>`).join('')}
+                  </div>
+                  <p class="snx-profile-hint">Choose up to 5 genres.</p>
+                </div>
+
+                <div class="snx-input-group">
+                  <label for="profileLanguage">Language</label>
+                  <select id="profileLanguage">
+                    ${['en', 'hi', 'mr', 'ta', 'te', 'kn', 'ml', 'bn', 'gu'].map(lang => `
+                      <option value="${lang}" ${(preferences.language || 'en') === lang ? 'selected' : ''}>${lang.toUpperCase()}</option>`).join('')}
+                  </select>
+                </div>
+
+                <label class="snx-switch-row">
+                  <span>
+                    <strong>Explicit Content</strong>
+                    <small>Allow explicit songs in recommendations.</small>
+                  </span>
+                  <input type="checkbox" id="profileExplicit" ${preferences.explicitContent !== false ? 'checked' : ''} />
+                </label>
+
+                <label class="snx-switch-row">
+                  <span>
+                    <strong>Autoplay</strong>
+                    <small>Keep music going when your queue ends.</small>
+                  </span>
+                  <input type="checkbox" id="profileAutoplay" ${preferences.autoplay !== false ? 'checked' : ''} />
+                </label>
+              </section>
+            </div>
+
+            <div class="snx-profile-footer">
+              <div>
+                <div class="snx-auth-error" id="profileError"></div>
+                <p class="snx-profile-hint">Saved to your SONIX account.</p>
+              </div>
+              <div class="snx-profile-footer-actions">
+                <button type="button" class="snx-follow-btn" id="profileResetBtn">Reset</button>
+                <button type="submit" class="snx-play-big" id="profileSaveBtn">Save Profile</button>
+              </div>
+            </div>
+          </form>
+        </div>`;
+
+      _bindProfileForm(token, profile, spotifyUser, initials);
+    } catch (err) {
+      _mainEl.innerHTML = `
+        <div class="snx-profile-page">
+          <div class="snx-no-results">${escapeHTML(err.message || 'Could not load profile.')}</div>
+        </div>`;
+    }
+  }
+
+  function _bindProfileForm(token, profile, spotifyUser, fallbackInitial) {
+    const form = document.getElementById('profileForm');
+    const errorEl = document.getElementById('profileError');
+    const bio = document.getElementById('profileBio');
+    const bioCount = document.getElementById('profileBioCount');
+    const displayName = document.getElementById('profileDisplayName');
+    const avatarUrl = document.getElementById('profileAvatarUrl');
+    const avatarPreview = document.getElementById('profileAvatarPreview');
+    const heroName = document.getElementById('profileHeroName');
+    const genrePills = document.getElementById('profileGenrePills');
+
+    bio?.addEventListener('input', () => {
+      if (bioCount) bioCount.textContent = String(bio.value.length);
+    });
+
+    displayName?.addEventListener('input', () => {
+      const nextName = displayName.value.trim() || profile.username || spotifyUser?.display_name || 'Listener';
+      if (heroName) heroName.textContent = nextName;
+      if (avatarPreview && !avatarUrl.value.trim()) {
+        avatarPreview.innerHTML = `<span>${escapeHTML(nextName.slice(0, 1).toUpperCase() || fallbackInitial)}</span>`;
+      }
+    });
+
+    avatarUrl?.addEventListener('input', () => {
+      const url = avatarUrl.value.trim();
+      if (!avatarPreview) return;
+      if (url) {
+        avatarPreview.classList.remove('snx-profile-avatar-empty');
+        avatarPreview.style.background = `url(${url}) center/cover`;
+        avatarPreview.innerHTML = '';
+      } else {
+        const nextName = displayName.value.trim() || profile.username || spotifyUser?.display_name || 'Listener';
+        avatarPreview.classList.add('snx-profile-avatar-empty');
+        avatarPreview.style.background = '';
+        avatarPreview.innerHTML = `<span>${escapeHTML(nextName.slice(0, 1).toUpperCase() || fallbackInitial)}</span>`;
+      }
+    });
+
+    genrePills?.addEventListener('change', e => {
+      const input = e.target.closest('input[type="checkbox"]');
+      if (!input) return;
+      const checked = [...genrePills.querySelectorAll('input:checked')];
+      if (checked.length > 5) {
+        input.checked = false;
+        SonixToast.show('Choose up to 5 genres', 'info');
+      }
+      genrePills.querySelectorAll('.snx-genre-pill').forEach(label => {
+        const cb = label.querySelector('input');
+        label.classList.toggle('active', cb.checked);
+      });
+    });
+
+    form?.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (errorEl) errorEl.textContent = '';
+
+      const genres = [...document.querySelectorAll('#profileGenrePills input:checked')].map(input => input.value);
+      const body = {
+        displayName: displayName.value.trim(),
+        bio: bio.value.trim(),
+        avatarUrl: avatarUrl.value.trim(),
+        preferences: {
+          genres,
+          explicitContent: document.getElementById('profileExplicit').checked,
+          autoplay: document.getElementById('profileAutoplay').checked,
+          language: document.getElementById('profileLanguage').value,
+        },
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/profile/me`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const details = Array.isArray(data.details) ? data.details.map(d => d.message).join(', ') : '';
+          throw new Error(details || data.error || 'Could not save profile');
+        }
+
+        SonixToast.show('Profile saved', 'success');
+        renderProfile();
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+        SonixToast.show('Could not save profile', 'error');
+      }
+    });
+
+    document.getElementById('profileResetBtn')?.addEventListener('click', async () => {
+      if (!confirm('Reset profile details and preferences?')) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/profile/me`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Could not reset profile');
+        SonixToast.show('Profile reset', 'success');
+        renderProfile();
+      } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+        SonixToast.show('Could not reset profile', 'error');
+      }
+    });
+  }
+
+  // CARD BINDING
   function _bindCards() {
     // Navigate on card click (artist/album)
     _mainEl.querySelectorAll('.snx-card[data-type="artist"], .snx-track-row[data-type="artist"], .snx-top-card[data-type="artist"]').forEach(el => {
@@ -630,8 +996,12 @@ const SonixRouter = (() => {
         if (!card) return;
         if (card.dataset.uri) {
           const type = card.dataset.type;
-          if (type === 'track') SpotifyAPI.playTrack(card.dataset.uri);
-          else SpotifyAPI.playContext(card.dataset.uri);
+          if (type === 'track') {
+            _rememberRecentFromElement(card);
+            SpotifyAPI.playTrack(card.dataset.uri);
+          } else {
+            SpotifyAPI.playContext(card.dataset.uri);
+          }
         } else if (card.dataset.type === 'artist') {
           navigate('artist', card.dataset.id);
         } else if (card.dataset.type === 'album') {
@@ -644,19 +1014,31 @@ const SonixRouter = (() => {
     _mainEl.querySelectorAll('.snx-quick-card').forEach(el => {
       el.addEventListener('click', e => {
         if (e.target.closest('.snx-quick-play')) {
-          if (el.dataset.uri) SpotifyAPI.playTrack(el.dataset.uri);
-          else navigate(el.dataset.type, el.dataset.id);
+          if (el.dataset.type === 'track' && el.dataset.uri) {
+            _rememberRecentFromElement(el);
+            SpotifyAPI.playTrack(el.dataset.uri);
+          } else if (el.dataset.uri) {
+            SpotifyAPI.playContext(el.dataset.uri);
+          } else {
+            navigate(el.dataset.type, el.dataset.id);
+          }
           return;
         }
         if (el.dataset.type === 'artist') navigate('artist', el.dataset.id);
-        else if (el.dataset.uri) SpotifyAPI.playTrack(el.dataset.uri);
+        else if (el.dataset.type === 'track' && el.dataset.uri) {
+          _rememberRecentFromElement(el);
+          SpotifyAPI.playTrack(el.dataset.uri);
+        }
       });
     });
 
     // Track rows (search results & artist page)
     _mainEl.querySelectorAll('.snx-tl-row, .snx-track-row').forEach(el => {
       el.addEventListener('click', () => {
-        if (el.dataset.uri) SpotifyAPI.playTrack(el.dataset.uri);
+        if (el.dataset.uri) {
+          _rememberRecentFromElement(el);
+          SpotifyAPI.playTrack(el.dataset.uri);
+        }
       });
     });
 
@@ -664,10 +1046,17 @@ const SonixRouter = (() => {
     _mainEl.querySelectorAll('.snx-top-card').forEach(el => {
       el.addEventListener('click', e => {
         if (e.target.closest('.snx-top-play')) {
-          if (el.dataset.uri) SpotifyAPI.playTrack(el.dataset.uri);
+          if (el.dataset.uri) {
+            _rememberRecentFromElement(el);
+            SpotifyAPI.playTrack(el.dataset.uri);
+          }
           return;
         }
         if (el.dataset.type === 'artist') navigate('artist', el.dataset.id);
+        else if (el.dataset.type === 'track' && el.dataset.uri) {
+          _rememberRecentFromElement(el);
+          SpotifyAPI.playTrack(el.dataset.uri);
+        }
       });
     });
 

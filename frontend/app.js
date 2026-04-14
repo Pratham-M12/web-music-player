@@ -145,12 +145,12 @@ async function populateLandingData() {
               <div class="artist-card" data-index="${i}">
                 <div class="artist-img-wrap">
                   <div class="artist-img" style="${img ? `background:url(${escapeHTML(img)}) center/cover` : 'background:linear-gradient(135deg,#3b0764,#7c3aed)'}"></div>
-                  <div class="artist-overlay">
-                    <button class="artist-play-btn">
-                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4L20 12L7 20V4Z"/></svg>
-                    </button>
-                  </div>
                 </div>
+                  <button class="artist-play-btn outside">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 4L20 12L7 20V4Z"/>
+                    </svg>
+                  </button>    
                 <div class="artist-info">
                   <span class="artist-genre">${escapeHTML(genre.charAt(0).toUpperCase()+genre.slice(1))}</span>
                   <h3 class="artist-name">${escapeHTML(artist.name)}</h3>
@@ -260,6 +260,9 @@ async function onSpotifyLogin() {
       SonixRouter.navigate(btn.dataset.view);
     });
   });
+
+  document.getElementById("sonixApp").style.display = "flex";
+  document.querySelector(".hero").style.display = "none";
 
   // ── Initialize router with main content el ───────────────────
   const mainEl = document.getElementById('snxMain');
@@ -1194,6 +1197,7 @@ function initSearch() {
 
 async function renderLikedSongs() {
   const main = document.getElementById("snxMain");
+  const token = localStorage.getItem("token");
 
   main.innerHTML = `
     <div class="snx-view">
@@ -1202,14 +1206,20 @@ async function renderLikedSongs() {
     </div>
   `;
 
-  const token = localStorage.getItem("token");
+  if (!token) {
+    document.getElementById("likedSongsList").innerHTML = `<p style="opacity:0.6">Sign in to SONIX to save liked songs</p>`;
+    SonixAuth?.open?.();
+    return;
+  }
+
   const res = await fetch(`${BACKEND_URL}/songs/liked`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  const songs = await res.json();
+  const payload = await res.json();
+  const songs = payload.data || payload || [];
   const container = document.getElementById("likedSongsList");
 
   if (songs.length === 0) {
@@ -1225,8 +1235,8 @@ async function renderLikedSongs() {
     div.innerHTML = `
       <span class="track-num">${i + 1}</span>
       <div class="track-info">
-        <span class="track-name">Liked Track</span>
-        <span class="track-artist">Spotify</span>
+        <span class="track-name">${escapeHTML(song.title || 'Liked Track')}</span>
+        <span class="track-artist">${escapeHTML(song.artist || 'Spotify')}</span>
       </div>
       <button class="track-like liked">❤️</button>
     `;

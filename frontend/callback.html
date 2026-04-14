@@ -32,8 +32,8 @@
   </style>
 </head>
 <body>
-  <script src="config.js"></script>
-  <script src="spotify.js"></script>
+  <script src="/frontend/config.js"></script>
+  <script src="/frontend/spotify.js"></script>
   <div class="logo">SONIX</div>
   <div class="spinner"></div>
   <p>Connecting to Spotify...</p>
@@ -52,9 +52,9 @@
       try {
         // 🔥 CALL THIS (IMPORTANT)
         const success = await SpotifyAPI.handleCallback(code);
-
+        console.log("SUCCESS:", success);
         if (success) {
-          window.location.href = "index.html";
+          window.location.href = "/frontend/index.html";
         } else {
           document.querySelector('p').textContent = 'Login failed';
         }

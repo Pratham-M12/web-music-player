@@ -453,26 +453,40 @@ const SpotifyAPI = (() => {
 
       const trackItem = btn.closest('.track-item');
       const uri = trackItem.dataset.spotifyUri;
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        SonixToast?.show?.('Sign in to SONIX to save liked songs', 'info');
+        SonixAuth?.open?.();
+        return;
+      }
 
       try {
         const res = await fetch(`${BACKEND_URL}/songs/like-by-uri`, {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ spotifyUrl: uri })
+          body: JSON.stringify({
+            spotifyUrl: uri,
+            title: trackItem.querySelector('.track-title, .track-name')?.textContent || '',
+            artist: trackItem.querySelector('.track-artist')?.textContent || '',
+            album: trackItem.querySelector('.track-album')?.textContent || '',
+          })
         });
 
         const data = await res.json();
-        console.log("LIKE RESPONSE:", data);
+        if (!res.ok) throw new Error(data.error || 'Like failed');
 
         // Toggle UI
-        const liked = btn.dataset.liked === 'true';
-        btn.dataset.liked = String(!liked);
-        btn.classList.toggle('liked', !liked);
+        btn.dataset.liked = String(data.liked);
+        btn.classList.toggle('liked', data.liked);
+        SonixToast?.show?.(data.liked ? 'Added to Liked Songs' : 'Removed from Liked Songs', 'success');
 
       } catch (err) {
         console.error("LIKE ERROR:", err);
+        SonixToast?.show?.('Could not update liked songs', 'error');
       }
     });
   });
